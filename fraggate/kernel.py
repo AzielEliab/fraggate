@@ -21,6 +21,7 @@ from fraggate.constants import (
     FG_HALLUC_FACT,
     MAGIC,
     PAPER,
+    STATUS_OK,
     VERSION,
 )
 from fraggate.envelopes import (
