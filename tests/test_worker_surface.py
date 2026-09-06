@@ -22,6 +22,7 @@ def test_worker_files_exist() -> None:
         "src/home.js",
         "src/runtime.js",
         "src/door.js",
+        "src/mesh.js",
         "wrangler.toml",
         "README.md",
         "public/sigil.png",
@@ -140,6 +141,12 @@ def test_door_proxy_joins_origin_paths() -> None:
     assert 'path === "/v1/fraggate/list"' in runtime
     assert "runFragGateOp(env, \"list\"" in runtime
     assert "runFragGateOp(env, \"call\"" in runtime
+    assert "isMeshPath" in door
+    assert "runMeshProxy" in door
+    assert "joinOriginUrl" in door
+    assert "originFetch" in door
+    assert "runMeshProxy" in runtime
+    assert "...meshOpenApiPaths()" in runtime
 
 
 def test_verify_door_proxy_script() -> None:

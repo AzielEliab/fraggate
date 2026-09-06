@@ -60,9 +60,11 @@ class DoorPage extends StatelessWidget {
           Text(
             'Canonical agent path:\n'
             'https://aziel-runtime.vibelock.workers.dev/mcp\n'
-            'https://aziel-runtime.vibelock.workers.dev/v1/fraggate/*\n\n'
+            'https://aziel-runtime.vibelock.workers.dev/v1/fraggate/*\n'
+            'https://aziel-runtime.vibelock.workers.dev/v1/mesh  (default OFF)\n\n'
             'Human UI:\n'
-            'https://fraggate-download-tracker.vibelock.workers.dev/',
+            'https://fraggate-download-tracker.vibelock.workers.dev/\n'
+            'Live Nodes: GET /v1/mesh PROXY. QNM live|locked|isolated. No Node Gate.',
             style: TextStyle(fontFamily: 'monospace', fontSize: 12, height: 1.4),
           ),
         ],

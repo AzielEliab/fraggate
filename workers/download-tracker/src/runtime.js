@@ -2,6 +2,7 @@
  * FragGate Worker runtime: skill, OpenAPI, MCP, and /v1/fraggate/* proxies.
  * The four human buttons (List, Describe, Call, Verify) hit these same ops.
  * This is not a second kernel. Agent path on aziel-runtime is /mcp + /v1/fraggate/*.
+ * `/v1/mesh/*` PROXY to aziel-runtime via AZIEL_RUNTIME (suite QNM rollup).
  *
  * Author: Aziel Eliab only. Apache-2.0.
  */
@@ -16,10 +17,13 @@ import {
   corsHeaders,
   doorBase,
   doorHeaders,
+  isMeshPath,
   json,
   mcpToolSchemas,
   runFragGateOp,
+  runMeshProxy,
 } from "./door.js";
+import { meshOpenApiPaths, meshPointer } from "./mesh.js";
 
 export const SKILL_MD = `---
 name: FragGate
@@ -68,6 +72,7 @@ This Worker **doubles** those four ops (proxy, not a second kernel):
 - OpenAPI: \`${HOST}/openapi.json\`
 - MCP: \`POST ${HOST}/mcp\`
 - Same routes: \`${HOST}/v1/fraggate/list|describe|verify|call\`
+- Suite mesh PROXY: \`${HOST}/v1/mesh/*\` (AZIEL_RUNTIME). Default OFF. QNM-BUILD-1.0 live|locked|isolated. No Node Gate. Catalog MCP \`mesh_*\` + FragGate \`slug=mesh\`.
 
 Always send \`User-Agent: Mozilla/5.0\`. Cloudflare Workers may 403 an empty agent.
 
@@ -127,7 +132,10 @@ export const EXAMPLE = {
     path: "/v1/fraggate/call",
     body: { slug: "decisiongate", op: "health", payload: {} },
   },
-  note: "Same four ops as the human buttons and as MCP tools fraggate_list / fraggate_describe / fraggate_verify / fraggate_call. Canonical agent door: " + DEFAULT_DOOR,
+  mesh: { method: "GET", path: "/v1/mesh" },
+  note:
+    "Same four ops as the human buttons and as MCP tools fraggate_list / fraggate_describe / fraggate_verify / fraggate_call. Suite mesh GET /v1/mesh PROXY (default OFF). Canonical agent door: " +
+    DEFAULT_DOOR,
 };
 
 function originOf(request) {
@@ -150,7 +158,9 @@ export function openapiSpec(origin, env) {
       description:
         "FragGate FG-0.1 door. Human buttons on this Worker call /v1/fraggate/*. MCP tools fraggate_list / fraggate_describe / fraggate_verify / fraggate_call map to those same routes (proxied to " +
         door +
-        "). Canonical agent path: POST " +
+        "). Suite mesh /v1/mesh/* PROXY to " +
+        door +
+        " (AZIEL_RUNTIME). Default OFF. QNM-BUILD-1.0 live|locked|isolated. No Node Gate. Catalog MCP mesh_* + FragGate slug=mesh. Canonical agent path: POST " +
         door +
         "/mcp and " +
         door +
@@ -266,7 +276,7 @@ export function openapiSpec(origin, env) {
           summary:
             "JSON-RPC MCP. Tools: runtime_skill, fraggate_list, fraggate_describe, fraggate_verify, fraggate_call. Canonical catalog MCP remains POST " +
             door +
-            "/mcp.",
+            "/mcp. Suite mesh pointer: GET /v1/mesh PROXY; catalog mesh_* + FragGate slug=mesh.",
           requestBody: {
             required: true,
             content: { "application/json": { schema: { type: "object" } } },
@@ -274,6 +284,7 @@ export function openapiSpec(origin, env) {
           responses: { "200": { description: "JSON-RPC" } },
         },
       },
+      ...meshOpenApiPaths(),
     },
   };
 }
@@ -288,6 +299,7 @@ function aiHtml(origin, env) {
 <p class="banner">Dual surface. Human UI is the Worker homepage. Agent path is MCP/OpenAPI over the same List / Describe / Call / Verify ops. Not a second kernel. Author Aziel Eliab.</p>
 <p>Canonical agent door: <code>POST ${door}/mcp</code> and <code>${door}/v1/fraggate/*</code></p>
 <p>This Worker doubles those four ops: <code>POST ${origin}/mcp</code> · <a href="${origin}/openapi.json">${origin}/openapi.json</a> · <a href="${origin}/v1/skill">skill</a></p>
+<p>Suite mesh: <code>GET ${origin}/v1/mesh</code> PROXY to aziel-runtime. Default OFF. QNM-BUILD-1.0 live|locked|isolated. No Node Gate. Catalog MCP <code>mesh_*</code> + FragGate <code>slug=mesh</code>. Author: Aziel Eliab only.</p>
 <pre>curl -sS -A 'Mozilla/5.0' ${origin}/v1/fraggate/list
 curl -sS -A 'Mozilla/5.0' '${origin}/v1/fraggate/describe?name=decisiongate'
 curl -sS -A 'Mozilla/5.0' -X POST ${origin}/v1/fraggate/verify -H 'content-type: application/json' -d '{"slug":"decisiongate"}'
@@ -308,7 +320,7 @@ function mcpInitialize(env) {
       doorBase(env) +
       "/mcp and " +
       doorBase(env) +
-      "/v1/fraggate/*. Start with runtime_skill or fraggate_list. Unknown names refuse FG-HALLUC-TOOL. Show display and refuse codes. Author Aziel Eliab only.",
+      "/v1/fraggate/*. Suite mesh /v1/mesh/* PROXY via AZIEL_RUNTIME (default OFF; QNM live|locked|isolated; no Node Gate). Catalog MCP mesh_* + FragGate slug=mesh. Start with runtime_skill or fraggate_list. Unknown names refuse FG-HALLUC-TOOL. Show display and refuse codes. Author Aziel Eliab only.",
   };
 }
 
@@ -415,7 +427,8 @@ export async function handleRuntimeApi(request, url, env) {
         catalog_openapi: doorBase(env) + "/openapi.json",
         worker_openapi: originOf(request) + "/openapi.json",
         ops: ["fraggate_list", "fraggate_describe", "fraggate_verify", "fraggate_call", "runtime_skill"],
-        note: "POST JSON-RPC here to double the human buttons. Canonical agent path is the catalog MCP on aziel-runtime.",
+        mesh: meshPointer(),
+        note: "POST JSON-RPC here to double the human buttons. Canonical agent path is the catalog MCP on aziel-runtime. Catalog MCP mesh_* + FragGate slug=mesh. This Worker /v1/mesh/* PROXY to aziel-runtime via AZIEL_RUNTIME. Suite mesh default OFF. QNM rollup live|locked|isolated. No Node Gate.",
         author: AUTHOR,
       };
       if (request.method === "HEAD") return new Response(null, { status: 200, headers: extra });
@@ -437,12 +450,13 @@ export async function handleRuntimeApi(request, url, env) {
       kv_increment: false,
       second_kernel: false,
       ops: ["list", "describe", "verify", "call"],
+      mesh: meshPointer(),
       catalog_mcp: doorBase(env) + "/mcp",
       catalog_openapi: doorBase(env) + "/openapi.json",
       author: AUTHOR,
       sigil: SIGIL,
       limitation:
-        "THIS IS: FG-0.1 kernel + dual-surface door (Worker UI and MCP/OpenAPI share List/Describe/Call/Verify). THIS IS NOT: a second kernel, a Lock, or UI-only FragGate.",
+        "THIS IS: FG-0.1 kernel + dual-surface door (Worker UI and MCP/OpenAPI share List/Describe/Call/Verify). Suite mesh /v1/mesh/* PROXY (default OFF). THIS IS NOT: a second kernel, a Lock, UI-only FragGate, a Node Gate, or a login mesh.",
     };
     if (request.method === "HEAD") return new Response(null, { status: 200, headers: extra });
     return json(body);
@@ -498,12 +512,19 @@ export async function handleRuntimeApi(request, url, env) {
     return json(out.data, out.status, extra);
   }
 
+  if (isMeshPath(path) || path === "/v1/mesh") {
+    const out = await runMeshProxy(env, request, path + (url.search || ""));
+    if (request.method === "HEAD") return new Response(null, { status: out.status, headers: extra });
+    return json(out.data, out.status, extra);
+  }
+
   if (path.startsWith("/v1/") || path === "/v1") {
     return json(
       {
         error: "not found",
-        hint: "GET /v1/health /v1/skill /v1/example /v1/fraggate /v1/fraggate/list /v1/fraggate/describe  POST /v1/fraggate/verify /v1/fraggate/call  POST /mcp",
+        hint: "GET /v1/health /v1/skill /v1/example /v1/fraggate /v1/fraggate/list /v1/fraggate/describe  POST /v1/fraggate/verify /v1/fraggate/call  GET /v1/mesh  POST /mcp",
         catalog_agent: doorBase(env) + "/mcp",
+        mesh: meshPointer(),
       },
       404,
     );

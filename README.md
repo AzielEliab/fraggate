@@ -31,6 +31,7 @@ This Worker (`fraggate-download-tracker`) **doubles** those ops (proxy, not a se
 - OpenAPI: https://fraggate-download-tracker.vibelock.workers.dev/openapi.json
 - MCP: `POST https://fraggate-download-tracker.vibelock.workers.dev/mcp`
 - Routes: `/v1/fraggate/list` · `/describe` · `/verify` · `/call`
+- Suite mesh PROXY: `/v1/mesh/*` via `AZIEL_RUNTIME` / `https://aziel-runtime.vibelock.workers.dev`. Default OFF. QNM-BUILD-1.0 live|locked|isolated. No Node Gate. Catalog MCP `mesh_*` + FragGate `slug=mesh`.
 
 The Python kernel is unchanged FG-0.1. Do not open a second kernel for the same session.
 
@@ -118,9 +119,10 @@ Human UI: https://fraggate-download-tracker.vibelock.workers.dev/
 | Call op | `POST /v1/fraggate/call` `{slug, op, payload}` | Result or typed refuse + ledger tip + DecisionGATE lineage |
 | Verify | `POST /v1/fraggate/verify` | `matched` + digest |
 | OpenAPI | `/openapi.json` and catalog OpenAPI | Same four paths |
-| MCP | `POST /mcp` and catalog `POST /mcp` | `fraggate_list`, `fraggate_describe`, `fraggate_verify`, `fraggate_call` |
+| MCP | `POST /mcp` and catalog `POST /mcp` | `fraggate_list`, `fraggate_describe`, `fraggate_verify`, `fraggate_call`. Mesh pointer: catalog `mesh_*` + FragGate `slug=mesh` |
+| Live Nodes | `GET /v1/mesh` PROXY | Default OFF. QNM live\|locked\|isolated. GET never enables. No Node Gate |
 
-Default door in the UI is **this Worker**. Buttons call same-origin `/v1/fraggate/*`, which proxies to `https://aziel-runtime.vibelock.workers.dev` (service binding `AZIEL_RUNTIME`, then public URL). Origin methods: **GET** list/describe, **POST** verify/call. “Catalog door” talks to aziel-runtime directly. Not AZBrowser.
+Default door in the UI is **this Worker**. Buttons call same-origin `/v1/fraggate/*`, which proxies to `https://aziel-runtime.vibelock.workers.dev` (service binding `AZIEL_RUNTIME`, then public URL). Origin methods: **GET** list/describe, **POST** verify/call. Suite mesh `/v1/mesh/*` PROXY (default OFF). “Catalog door” talks to aziel-runtime directly. Not AZBrowser. Not a Node Gate.
 
 Curl the **Worker double the buttons hit** (Mozilla/5.0):
 
@@ -130,6 +132,7 @@ curl -sS -A 'Mozilla/5.0' "$HOST/v1/fraggate/list"
 curl -sS -A 'Mozilla/5.0' "$HOST/v1/fraggate/describe?name=decisiongate"
 curl -sS -A 'Mozilla/5.0' -X POST "$HOST/v1/fraggate/verify" -H 'content-type: application/json' -d '{"slug":"decisiongate"}'
 curl -sS -A 'Mozilla/5.0' -X POST "$HOST/v1/fraggate/call" -H 'content-type: application/json' -d '{"slug":"azbrowser","op":"ethical_search","payload":{"q":"x"}}'
+curl -sS -A 'Mozilla/5.0' "$HOST/v1/mesh"
 ```
 
 Same paths on the catalog door (`https://aziel-runtime.vibelock.workers.dev`). Offline check: `node workers/download-tracker/scripts/verify-door-proxy.mjs`.
