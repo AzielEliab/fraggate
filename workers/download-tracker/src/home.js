@@ -363,11 +363,11 @@ export function renderHome(stats, opts = {}) {
 
     <section class="workspace" id="workspace">
       <h2><span class="kicker">Live software</span>FragGate door</h2>
-      <p class="lede">Wired buttons — not chrome. They call live <code>${DEFAULT_DOOR}/v1/fraggate/*</code> (List / Describe / Call / Verify). This Worker’s <a href="/openapi.json">OpenAPI</a> and <a href="/mcp">MCP</a> double those same four ops. FragGate is the door. Canonical agent path: <code>POST ${DEFAULT_DOOR}/mcp</code>.</p>
+      <p class="lede">Wired buttons — not chrome. They call this Worker’s <code>/v1/fraggate/*</code> (List / Describe / Call / Verify), which proxies the live catalog door <code>${DEFAULT_DOOR}/v1/fraggate/*</code>. OpenAPI and MCP share those same four ops. FragGate is the door. Canonical agent path: <code>POST ${DEFAULT_DOOR}/mcp</code>.</p>
       <div class="workgrid">
         <form id="ws-form" autocomplete="off">
-          <label for="door"><span class="kicker">Door</span> Default is the live aziel-runtime FragGate door. “This Worker” uses the local OpenAPI/MCP double.</label>
-          <input id="door" type="url" placeholder="${escapeHtml(door)}" value="${escapeHtml(DEFAULT_DOOR)}">
+          <label for="door"><span class="kicker">Door</span> Default is this Worker (same-origin <code>/v1/fraggate/*</code> proxy). “Catalog door” talks to aziel-runtime directly. Not AZBrowser.</label>
+          <input id="door" type="url" placeholder="${escapeHtml(HOST)}" value="${escapeHtml(HOST)}">
           <div class="actions">
             <button type="button" class="ghost" id="btn-door-self">This Worker</button>
             <button type="button" class="ghost" id="btn-door-catalog">Catalog door</button>
@@ -438,7 +438,7 @@ export function renderHome(stats, opts = {}) {
           <tr><td>MCP</td><td><code>POST /mcp</code> and catalog <code>POST /mcp</code></td><td>tools: fraggate_list, fraggate_describe, fraggate_verify, fraggate_call</td></tr>
         </tbody>
       </table>
-      <p class="meta">Default door = live <code>${DEFAULT_DOOR}</code>. “This Worker” = the OpenAPI/MCP double on this host. Both call <code>/v1/fraggate/*</code>. Not UI-only.</p>
+      <p class="meta">Default door = this Worker. Buttons call same-origin <code>/v1/fraggate/*</code>, which forwards to <code>${DEFAULT_DOOR}</code> (GET list / describe, POST verify / call). Catalog door is the origin itself. Not AZBrowser. Not UI-only.</p>
     </section>
 
     <section class="card" id="install">
@@ -494,8 +494,9 @@ export function renderHome(stats, opts = {}) {
       }
       function doorRoot() {
         var typed = ($("door").value || "").trim().replace(/\\/+$/, "");
-        if (typed) return typed;
-        return boot.catalog || ${JSON.stringify(DEFAULT_DOOR)};
+        var self = boot.host || (typeof location !== "undefined" ? location.origin : "");
+        if (!typed || typed === self || typed === "/") return "";
+        return typed;
       }
       function fillForm(slug, op) {
         if (slug) $("slug").value = slug;
@@ -617,7 +618,7 @@ export function renderHome(stats, opts = {}) {
           return hit("/v1/fraggate/call", "POST", body);
         });
       };
-      $("btn-door-self").onclick = function () { $("door").value = ""; };
+      $("btn-door-self").onclick = function () { $("door").value = boot.host || (typeof location !== "undefined" ? location.origin : ""); };
       $("btn-door-catalog").onclick = function () { $("door").value = boot.catalog; };
       var installBtn = $("install-btn");
       var installPre = $("install-cmd");

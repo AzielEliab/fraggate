@@ -11,7 +11,8 @@ Expected URL after deploy (workers.dev + account subdomain, same as sibling prod
 - `GET /` — complete FragGate UI (wired list / describe / call / verify) + counted views
 - `GET /download` — counted tarball (HTTP 200 gzip, no 302)
 - `GET /count` — `{views, downloads, total}`
-- `GET /v1/fraggate/*` — same four ops the buttons hit (proxy to `FRAGGATE_DOOR`)
+- `GET /v1/fraggate/list` · `GET /v1/fraggate/describe` — proxy to `FRAGGATE_DOOR` / `AZIEL_RUNTIME` (service binding first)
+- `POST /v1/fraggate/verify` · `POST /v1/fraggate/call` — same door, JSON body
 - `GET /openapi.json` — documents those four ops
 - `POST /mcp` — MCP tools `fraggate_list` / `fraggate_describe` / `fraggate_verify` / `fraggate_call`
 - `GET /v1/health` · `/v1/skill` · `/v1/example` — do **not** increment downloads
@@ -27,7 +28,7 @@ This Worker **doubles** that door. It is not a second kernel.
 
 ## Button test matrix
 
-Default door is live `https://aziel-runtime.vibelock.workers.dev`. Buttons call `/v1/fraggate/*` there.
+Default door is **this Worker**. Buttons call same-origin `/v1/fraggate/*`, which forwards to `https://aziel-runtime.vibelock.workers.dev` via the `AZIEL_RUNTIME` service binding (public URL fallback). Origin methods: **GET** `/v1/fraggate/list` and `/describe`; **POST** `/v1/fraggate/verify` and `/call`. Not AZBrowser.
 
 | Button | Hits | Expected |
 | --- | --- | --- |

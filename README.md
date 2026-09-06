@@ -120,20 +120,19 @@ Human UI: https://fraggate-download-tracker.vibelock.workers.dev/
 | OpenAPI | `/openapi.json` and catalog OpenAPI | Same four paths |
 | MCP | `POST /mcp` and catalog `POST /mcp` | `fraggate_list`, `fraggate_describe`, `fraggate_verify`, `fraggate_call` |
 
-Default door in the UI is live `https://aziel-runtime.vibelock.workers.dev`. Buttons call `/v1/fraggate/*` on that host. “This Worker” switches to the OpenAPI/MCP double. Both are the same four FragGate ops.
+Default door in the UI is **this Worker**. Buttons call same-origin `/v1/fraggate/*`, which proxies to `https://aziel-runtime.vibelock.workers.dev` (service binding `AZIEL_RUNTIME`, then public URL). Origin methods: **GET** list/describe, **POST** verify/call. “Catalog door” talks to aziel-runtime directly. Not AZBrowser.
 
-Curl the **live door the buttons hit** (Mozilla/5.0):
+Curl the **Worker double the buttons hit** (Mozilla/5.0):
 
 ```bash
-DOOR=https://aziel-runtime.vibelock.workers.dev
-curl -sS -A 'Mozilla/5.0' "$DOOR/v1/fraggate/list"
-curl -sS -A 'Mozilla/5.0' "$DOOR/v1/fraggate/describe?name=decisiongate"
-curl -sS -A 'Mozilla/5.0' -X POST "$DOOR/v1/fraggate/verify" -H 'content-type: application/json' -d '{"slug":"decisiongate"}'
-curl -sS -A 'Mozilla/5.0' -X POST "$DOOR/v1/fraggate/call" -H 'content-type: application/json' -d '{"slug":"decisiongate","op":"health","payload":{}}'
-curl -sS -A 'Mozilla/5.0' -X POST "$DOOR/mcp" -H 'content-type: application/json' -d '{"jsonrpc":"2.0","id":1,"method":"tools/list","params":{}}'
+HOST=https://fraggate-download-tracker.vibelock.workers.dev
+curl -sS -A 'Mozilla/5.0' "$HOST/v1/fraggate/list"
+curl -sS -A 'Mozilla/5.0' "$HOST/v1/fraggate/describe?name=decisiongate"
+curl -sS -A 'Mozilla/5.0' -X POST "$HOST/v1/fraggate/verify" -H 'content-type: application/json' -d '{"slug":"decisiongate"}'
+curl -sS -A 'Mozilla/5.0' -X POST "$HOST/v1/fraggate/call" -H 'content-type: application/json' -d '{"slug":"azbrowser","op":"ethical_search","payload":{"q":"x"}}'
 ```
 
-Same paths on the Worker double (`https://fraggate-download-tracker.vibelock.workers.dev`).
+Same paths on the catalog door (`https://aziel-runtime.vibelock.workers.dev`). Offline check: `node workers/download-tracker/scripts/verify-door-proxy.mjs`.
 
 Unknown names are `FG-HALLUC-TOOL`. Schema drift is `FG-FRAG-SCHEMA`. Ungrounded facts are `FG-HALLUC-FACT`. Invented artifacts are `FG-HALLUC-ARTIFACT`. DecisionGATE refuse is `FG-GATE`. Every call, including refuse, appends the ledger.
 
