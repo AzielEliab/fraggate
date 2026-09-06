@@ -6,7 +6,7 @@
  * Author: Aziel Eliab. Apache-2.0.
  */
 import assert from "node:assert/strict";
-import { joinDoorUrl, normalizeDoorOrigin, runFragGateOp, DEFAULT_DOOR, HOST } from "../src/door.js";
+import { joinDoorUrl, normalizeDoorOrigin, runFragGateOp, SERVICE_BINDING_ORIGIN, HOST } from "../src/door.js";
 import { handleRuntimeApi } from "../src/runtime.js";
 
 const ORIGIN = "https://aziel-runtime.vibelock.workers.dev";
@@ -50,7 +50,8 @@ const env = {
   AZIEL_RUNTIME: {
     async fetch(request) {
       const url = new URL(request.url);
-      seen.push({ method: request.method, path: url.pathname, search: url.search });
+      seen.push({ method: request.method, href: url.href, path: url.pathname, search: url.search });
+      assert.equal(url.origin, SERVICE_BINDING_ORIGIN);
       if (url.pathname === "/v1/fraggate/list" && request.method === "GET") return jsonRes(mockList);
       if (url.pathname === "/v1/fraggate/call" && request.method === "POST") {
         const body = await request.json();
@@ -108,8 +109,27 @@ assert.equal(callHttp.status, 200);
 assert.equal(callHttp.data.ok, true);
 assert.equal(callHttp.data.code, "FG-OK");
 
-assert.ok(seen.some((s) => s.method === "GET" && s.path === "/v1/fraggate/list"));
+assert.ok(seen.some((s) => s.method === "GET" && s.href === `${SERVICE_BINDING_ORIGIN}/v1/fraggate/list`));
 assert.ok(seen.some((s) => s.method === "POST" && s.path === "/v1/fraggate/call"));
+
+const htmlEnv = {
+  FRAGGATE_DOOR: ORIGIN,
+  AZIEL_RUNTIME: {
+    async fetch() {
+      return new Response("<!doctype html><title>404</title>", {
+        status: 404,
+        headers: { "Content-Type": "text/html; charset=utf-8" },
+      });
+    },
+  },
+};
+const htmlOp = await runFragGateOp(htmlEnv, "list", {}, new Request(`${HOST}/v1/fraggate/list`));
+assert.equal(htmlOp.data.code, "FG-ERR");
+assert.equal(htmlOp.data.message, "Door returned non-JSON.");
+assert.equal(htmlOp.data.door_url, `${ORIGIN}/v1/fraggate/list`);
+assert.equal(htmlOp.data.http_status, 404);
+assert.match(htmlOp.data.content_type, /text\/html/);
+assert.equal(htmlOp.data.via, "service-binding");
 
 if (process.env.FRAGGATE_LIVE === "1") {
   const liveList = await fetch(`${ORIGIN}/v1/fraggate/list`, {

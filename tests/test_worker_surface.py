@@ -128,7 +128,11 @@ def test_door_proxy_joins_origin_paths() -> None:
     assert "doorFetch" in door
     assert "doorService" in door
     assert "AZIEL_RUNTIME" in door
+    assert 'SERVICE_BINDING_ORIGIN = "https://aziel-runtime"' in door
     assert "normalizeDoorOrigin" in door
+    assert "door_url" in door
+    assert "http_status" in door
+    assert "content_type" in door
     assert "binding = \"AZIEL_RUNTIME\"" in toml
     assert 'service = "aziel-runtime"' in toml
     assert "run_worker_first = true" in toml

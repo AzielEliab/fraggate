@@ -16,9 +16,10 @@ id = "00000000000000000000000000000000"
 [vars]
 FRAGGATE_DOOR = "https://aziel-runtime.vibelock.workers.dev"
 
-# Same-account door. Public `*.vibelock.workers.dev` subrequests can miss
-# the origin Worker (assets / hostname-ignored 404 HTML). Binding is the
-# aziel-runtime upstreamFetch pattern. Parent deploy wires it.
+# Worker→Worker public fetch of FRAGGATE_DOOR can return HTML/404.
+# Proxy via env.AZIEL_RUNTIME.fetch(new Request("https://aziel-runtime/v1/fraggate/…")).
+# Hostname is a placeholder (not DNS). HTTP fallback only when unbound.
+# FRAGGATE_DOOR stays the display / public URL.
 [[services]]
 binding = "AZIEL_RUNTIME"
 service = "aziel-runtime"

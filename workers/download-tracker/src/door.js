@@ -46,9 +46,12 @@ export function normalizeDoorOrigin(raw) {
 }
 
 export function doorBase(env) {
-  const asUrl = (value) => (typeof value === "string" && value.trim() ? normalizeDoorOrigin(value) : "");
-  return asUrl(env && env.FRAGGATE_DOOR) || asUrl(env && env.AZIEL_RUNTIME) || DEFAULT_DOOR;
+  const raw = env && typeof env.FRAGGATE_DOOR === "string" ? env.FRAGGATE_DOOR.trim() : "";
+  return raw ? normalizeDoorOrigin(raw) : DEFAULT_DOOR;
 }
+
+/** Placeholder host for service-binding fetch. Hostname is not DNS-resolved. */
+export const SERVICE_BINDING_ORIGIN = "https://aziel-runtime";
 
 /**
  * Join door origin + FragGate path without doubling `/v1/fraggate`.
@@ -69,11 +72,8 @@ export function joinDoorUrl(base, pathAndQuery) {
 }
 
 export function doorService(env) {
-  if (!env) return null;
-  for (const key of ["AZIEL_RUNTIME", "FRAGGATE_DOOR_SERVICE", "RUNTIME"]) {
-    const bind = env[key];
-    if (bind && typeof bind === "object" && typeof bind.fetch === "function") return bind;
-  }
+  const bind = env && env.AZIEL_RUNTIME;
+  if (bind && typeof bind === "object" && typeof bind.fetch === "function") return bind;
   return null;
 }
 
@@ -91,10 +91,25 @@ function isSelfDoorUrl(url, request) {
   return false;
 }
 
+function fgErrFields({ message, door_url, http_status, content_type, via, extra }) {
+  return {
+    ok: false,
+    code: "FG-ERR",
+    door: "fraggate",
+    kernel: KERNEL,
+    message,
+    door_url: door_url || "",
+    http_status: http_status == null ? null : http_status,
+    content_type: content_type || "",
+    via: via || "",
+    ...(extra || {}),
+  };
+}
+
 /**
- * Fetch one door path. Prefer the aziel-runtime service binding so
- * same-zone `*.vibelock.workers.dev` subrequests do not miss the
- * origin Worker (assets / hostname-ignored 404 HTML → FG-ERR non-JSON).
+ * Fetch one door path. Prefer env.AZIEL_RUNTIME service binding
+ * (`https://aziel-runtime/v1/fraggate/…` — hostname is a placeholder).
+ * Public FRAGGATE_DOOR HTTP only when the binding is unbound.
  */
 export async function doorFetch(env, pathAndQuery, init, request) {
   const headers = new Headers((init && init.headers) || {});
@@ -106,16 +121,18 @@ export async function doorFetch(env, pathAndQuery, init, request) {
     next.signal = AbortSignal.timeout(20000);
   }
 
+  const door_url = joinDoorUrl(doorBase(env), pathAndQuery);
   const bind = doorService(env);
   if (bind) {
-    return bind.fetch(new Request("https://aziel-runtime.internal" + pathAndQuery, next));
+    const res = await bind.fetch(new Request(SERVICE_BINDING_ORIGIN + pathAndQuery, next));
+    return { res, via: "service-binding", door_url };
   }
 
-  const url = joinDoorUrl(doorBase(env), pathAndQuery);
-  if (isSelfDoorUrl(url, request)) {
+  if (isSelfDoorUrl(door_url, request)) {
     throw new Error("Door URL points at this Worker — refusing self-fetch loop.");
   }
-  return fetch(url, next);
+  const res = await fetch(door_url, next);
+  return { res, via: "http", door_url };
 }
 
 export function json(body, status = 200, extraHeaders = {}) {
@@ -203,10 +220,10 @@ export async function runFragGateOp(env, op, params = {}, request) {
     }
   }
 
-  const url = joinDoorUrl(doorBase(env), path);
-  let res;
+  const door_url = joinDoorUrl(doorBase(env), path);
+  let fetched;
   try {
-    res = await doorFetch(
+    fetched = await doorFetch(
       env,
       path,
       {
@@ -219,29 +236,30 @@ export async function runFragGateOp(env, op, params = {}, request) {
   } catch (err) {
     return {
       status: 502,
-      data: {
-        ok: false,
-        code: "FG-ERR",
-        door: "fraggate",
-        kernel: KERNEL,
+      data: fgErrFields({
         message: "Door fetch failed.",
-        detail: String(err && err.message ? err.message : err),
-        door_url: url,
-      },
+        door_url,
+        http_status: null,
+        content_type: "",
+        via: doorService(env) ? "service-binding" : "http",
+        extra: { detail: String(err && err.message ? err.message : err) },
+      }),
     };
   }
 
+  const res = fetched.res;
+  const via = fetched.via;
   const len = Number(res.headers.get("Content-Length") || "0");
   if (Number.isFinite(len) && len > 2 * 1024 * 1024) {
     return {
       status: 502,
-      data: {
-        ok: false,
-        code: "FG-ERR",
-        door: "fraggate",
+      data: fgErrFields({
         message: "Door response too large for this Worker proxy.",
-        door_url: url,
-      },
+        door_url: fetched.door_url || door_url,
+        http_status: res.status,
+        content_type: res.headers.get("Content-Type") || "",
+        via,
+      }),
     };
   }
 
@@ -256,16 +274,14 @@ export async function runFragGateOp(env, op, params = {}, request) {
     const preview = String(text || "").replace(/\s+/g, " ").slice(0, 160);
     return {
       status: res.status || 502,
-      data: {
-        ok: false,
-        code: "FG-ERR",
-        door: "fraggate",
+      data: fgErrFields({
         message: "Door returned non-JSON.",
+        door_url: fetched.door_url || door_url,
         http_status: res.status,
         content_type: res.headers.get("Content-Type") || "",
-        door_url: url,
-        preview,
-      },
+        via,
+        extra: { preview },
+      }),
     };
   }
   return { status: res.status, data };
