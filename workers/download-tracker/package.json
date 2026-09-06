@@ -1,0 +1,8 @@
+{
+  "private": true,
+  "description": "FragGate isolated download tracker + human Worker UI for the public door",
+  "license": "Apache-2.0",
+  "dependencies": {
+    "wrangler": "^4.127.1"
+  }
+}

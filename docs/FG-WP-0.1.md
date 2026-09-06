@@ -9,6 +9,7 @@
 - Author: Aziel Eliab
 - License: Apache-2.0
 - Homepage (runtime door): https://aziel-runtime.vibelock.workers.dev/
+- Human Worker UI: https://fraggate-download-tracker.vibelock.workers.dev/
 - Repository: https://github.com/AzielEliab/fraggate
 
 Historical note: an earlier draft of this paper used the dual credit line “Aziel / GodLock.AZ”. Public credit is **Aziel Eliab** only. GodLock is a product name in the Aziel Eliab catalog, not an author and not this kernel.
@@ -120,7 +121,7 @@ aziel-runtime remains the public mesh: catalog, pull, session, in-process engine
 - Not a chatbot personality.
 - Not a second identity.
 - Not a network relay or public chat surface.
-- Not a counted download (FG-0.1 is local).
+- Not a second kernel. FG-0.1 stays local. A counted Worker UI may host the same tarball and **double** List / Describe / Call / Verify over the public door (OpenAPI + MCP). That surface is not UI-only and does not replace CallEnvelope.
 - Not a rewrite of the Locks.
 - Not legal advice, not a court, not a truth score.
 
