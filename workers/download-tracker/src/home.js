@@ -363,11 +363,11 @@ export function renderHome(stats, opts = {}) {
 
     <section class="workspace" id="workspace">
       <h2><span class="kicker">Live software</span>FragGate door</h2>
-      <p class="lede">Wired buttons — not chrome. They call this Worker’s <code>/v1/fraggate/*</code> (same backend as <a href="/openapi.json">OpenAPI</a> and <a href="/mcp">MCP</a>), which proxies the public door. Canonical agent path: <code>POST ${DEFAULT_DOOR}/mcp</code> and <code>${DEFAULT_DOOR}/v1/fraggate/*</code>.</p>
+      <p class="lede">Wired buttons — not chrome. They call live <code>${DEFAULT_DOOR}/v1/fraggate/*</code> (List / Describe / Call / Verify). This Worker’s <a href="/openapi.json">OpenAPI</a> and <a href="/mcp">MCP</a> double those same four ops. FragGate is the door. Canonical agent path: <code>POST ${DEFAULT_DOOR}/mcp</code>.</p>
       <div class="workgrid">
         <form id="ws-form" autocomplete="off">
-          <label for="door"><span class="kicker">Door</span> Leave blank to use this Worker (MCP/OpenAPI double). Or set the catalog host.</label>
-          <input id="door" type="url" placeholder="${escapeHtml(door)}" value="">
+          <label for="door"><span class="kicker">Door</span> Default is the live aziel-runtime FragGate door. “This Worker” uses the local OpenAPI/MCP double.</label>
+          <input id="door" type="url" placeholder="${escapeHtml(door)}" value="${escapeHtml(DEFAULT_DOOR)}">
           <div class="actions">
             <button type="button" class="ghost" id="btn-door-self">This Worker</button>
             <button type="button" class="ghost" id="btn-door-catalog">Catalog door</button>
@@ -438,7 +438,7 @@ export function renderHome(stats, opts = {}) {
           <tr><td>MCP</td><td><code>POST /mcp</code> and catalog <code>POST /mcp</code></td><td>tools: fraggate_list, fraggate_describe, fraggate_verify, fraggate_call</td></tr>
         </tbody>
       </table>
-      <p class="meta">Blank door field = this Worker (the OpenAPI/MCP double). Catalog door = <code>${DEFAULT_DOOR}</code>. Both are the same four FragGate ops. Not UI-only.</p>
+      <p class="meta">Default door = live <code>${DEFAULT_DOOR}</code>. “This Worker” = the OpenAPI/MCP double on this host. Both call <code>/v1/fraggate/*</code>. Not UI-only.</p>
     </section>
 
     <section class="card" id="install">
@@ -495,7 +495,7 @@ export function renderHome(stats, opts = {}) {
       function doorRoot() {
         var typed = ($("door").value || "").trim().replace(/\\/+$/, "");
         if (typed) return typed;
-        return window.location.origin;
+        return boot.catalog || ${JSON.stringify(DEFAULT_DOOR)};
       }
       function fillForm(slug, op) {
         if (slug) $("slug").value = slug;

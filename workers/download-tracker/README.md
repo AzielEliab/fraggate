@@ -27,13 +27,15 @@ This Worker **doubles** that door. It is not a second kernel.
 
 ## Button test matrix
 
+Default door is live `https://aziel-runtime.vibelock.workers.dev`. Buttons call `/v1/fraggate/*` there.
+
 | Button | Hits | Expected |
 | --- | --- | --- |
-| List registry | `GET /v1/fraggate/list` | Hashed entries, registry digest, live/stub counts |
+| List registry | `GET {door}/v1/fraggate/list` | Hashed entries, registry digest, live/stub counts |
 | LIVE ops | same list, show `live_ops` | Clickable `slug/op` chips fill the Call form |
-| Describe | `GET /v1/fraggate/describe?name=` | One catalog entry |
-| Call op | `POST /v1/fraggate/call` `{slug, op, payload}` | Result or typed refuse + ledger tip + DecisionGATE lineage |
-| Verify | `POST /v1/fraggate/verify` | `matched` + digest |
+| Describe | `GET {door}/v1/fraggate/describe?name=` | One catalog entry |
+| Call op | `POST {door}/v1/fraggate/call` `{slug, op, payload}` | Result or typed refuse + ledger tip + DecisionGATE lineage |
+| Verify | `POST {door}/v1/fraggate/verify` | `matched` + digest |
 | OpenAPI | `/openapi.json` and catalog OpenAPI | Same four paths |
 | MCP | `POST /mcp` and catalog `POST /mcp` | `fraggate_list`, `fraggate_describe`, `fraggate_verify`, `fraggate_call` |
 

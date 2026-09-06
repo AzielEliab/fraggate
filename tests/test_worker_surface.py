@@ -64,6 +64,11 @@ def test_four_ops_shared_across_surfaces() -> None:
     assert "btn-live" in home
     assert "FG-HALLUC-TOOL" in home
     assert "ledger_tip" in home or "last-tip" in home
+    assert 'value="${escapeHtml(DEFAULT_DOOR)}"' in home
+    assert "hit(\"/v1/fraggate/list\"" in home
+    assert "hit(\"/v1/fraggate/call\"" in home
+    assert "TODO" not in home
+    assert "coming soon" not in home.lower()
 
 
 def test_mcp_and_openapi_double_buttons() -> None:
