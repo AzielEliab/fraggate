@@ -49,6 +49,7 @@ This Worker **doubles** those four ops (proxy, not a second kernel):
 - OpenAPI: https://fraggate-download-tracker.vibelock.workers.dev/openapi.json
 - MCP: `POST https://fraggate-download-tracker.vibelock.workers.dev/mcp`
 - Same routes: `/v1/fraggate/list` · `/describe` · `/verify` · `/call`
+- Suite mesh PROXY: `/v1/mesh/*` via `AZIEL_RUNTIME`. Default OFF. QNM-BUILD-1.0 live|locked|isolated. No Node Gate. Catalog MCP `mesh_*` + FragGate `slug=mesh`.
 
 MCP tools that map 1:1 to the human buttons: `fraggate_list`,
 `fraggate_describe`, `fraggate_verify`, `fraggate_call` (+ `runtime_skill`).

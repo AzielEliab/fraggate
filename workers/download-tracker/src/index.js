@@ -8,7 +8,7 @@ import { AUTHOR, HOST, VERSION, corsHeaders, doorBase, json } from "./door.js";
  * GET / increments page-view counter, complete door UI + Views/Downloads
  * GET /download increments downloads, serves tarball via env.ASSETS.fetch (no 302)
  * GET /count {views, downloads, total}
- * /v1 and /mcp do not increment.
+ * /v1, /mcp, and /v1/mesh/* do not increment.
  *
  * Isolated: Worker fraggate-download-tracker, KV FRAGGATE_DOWNLOADS.
  */
@@ -190,7 +190,7 @@ async function collectStats(env) {
       watchers: github.watchers || 0,
       release_download_count: github.release_download_count || 0,
     },
-    note: "Isolated FragGate counter. /v1 and /mcp do not increment.",
+    note: "Isolated FragGate counter. /v1, /mcp, and /v1/mesh/* do not increment.",
   };
 }
 

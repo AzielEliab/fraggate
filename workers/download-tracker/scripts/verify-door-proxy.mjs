@@ -6,8 +6,17 @@
  * Author: Aziel Eliab. Apache-2.0.
  */
 import assert from "node:assert/strict";
-import { joinDoorUrl, normalizeDoorOrigin, runFragGateOp, SERVICE_BINDING_ORIGIN, HOST } from "../src/door.js";
+import {
+  joinDoorUrl,
+  joinOriginUrl,
+  normalizeDoorOrigin,
+  runFragGateOp,
+  runMeshProxy,
+  SERVICE_BINDING_ORIGIN,
+  HOST,
+} from "../src/door.js";
 import { handleRuntimeApi } from "../src/runtime.js";
+import { meshPointer } from "../src/mesh.js";
 
 const ORIGIN = "https://aziel-runtime.vibelock.workers.dev";
 
@@ -20,6 +29,13 @@ assert.equal(
   `${ORIGIN}/v1/fraggate/describe?name=azbrowser`,
 );
 assert.notEqual(joinDoorUrl(ORIGIN, "/v1/fraggate/list"), `${ORIGIN}/v1/fraggate/v1/fraggate/list`);
+assert.equal(joinOriginUrl(ORIGIN, "/v1/mesh"), `${ORIGIN}/v1/mesh`);
+assert.equal(joinOriginUrl(ORIGIN, "/v1/mesh/nodes"), `${ORIGIN}/v1/mesh/nodes`);
+assert.notEqual(joinDoorUrl(ORIGIN, "/v1/mesh"), `${ORIGIN}/v1/mesh`);
+assert.equal(joinDoorUrl(ORIGIN, "/v1/mesh"), `${ORIGIN}/v1/fraggate/v1/mesh`);
+assert.equal(meshPointer().enabled_default, false);
+assert.equal(meshPointer().node_gate, false);
+assert.equal(meshPointer().rollup, "live|locked|isolated");
 
 function jsonRes(body, status = 200) {
   return new Response(JSON.stringify(body), {
@@ -59,7 +75,25 @@ const env = {
         assert.equal(body.op, "ethical_search");
         return jsonRes(mockCall);
       }
-      return jsonRes({ error: "not found", hint: "GET /v1/fraggate/list  POST /v1/fraggate/call" }, 404);
+      if (url.pathname === "/v1/mesh" && request.method === "GET") {
+        return jsonRes({
+          ok: true,
+          code: "MESH-OK",
+          enabled: false,
+          radios: "off",
+          mesh_default: "off",
+          spec: "QNM-BUILD-1.0",
+          rollup: { live: 0, locked: 0, isolated: 0 },
+          live_nodes: 0,
+          author: "Aziel Eliab",
+        });
+      }
+      if (url.pathname === "/v1/mesh/enable" && request.method === "POST") {
+        const body = await request.json();
+        if (!body.bearer) return jsonRes({ ok: false, code: "MESH-NEED-BEARER", enabled: false }, 400);
+        return jsonRes({ ok: true, code: "MESH-OK", enabled: true, radios: "on", bearers: [body.bearer] });
+      }
+      return jsonRes({ error: "not found", hint: "GET /v1/fraggate/list  POST /v1/fraggate/call  GET /v1/mesh" }, 404);
     },
   },
 };
@@ -112,6 +146,34 @@ assert.equal(callHttp.data.code, "FG-OK");
 assert.ok(seen.some((s) => s.method === "GET" && s.href === `${SERVICE_BINDING_ORIGIN}/v1/fraggate/list`));
 assert.ok(seen.some((s) => s.method === "POST" && s.path === "/v1/fraggate/call"));
 
+const meshOp = await runMeshProxy(env, new Request(`${HOST}/v1/mesh`), "/v1/mesh");
+assert.equal(meshOp.status, 200);
+assert.equal(meshOp.data.ok, true);
+assert.equal(meshOp.data.enabled, false);
+assert.equal(meshOp.data.code, "MESH-OK");
+assert.deepEqual(meshOp.data.rollup, { live: 0, locked: 0, isolated: 0 });
+
+const meshHttp = await worker("/v1/mesh", "GET");
+assert.equal(meshHttp.status, 200);
+assert.equal(meshHttp.data.ok, true);
+assert.equal(meshHttp.data.enabled, false);
+
+const enableEmpty = await worker("/v1/mesh/enable", "POST", {});
+assert.equal(enableEmpty.status, 400);
+assert.equal(enableEmpty.data.code, "MESH-NEED-BEARER");
+assert.notEqual(enableEmpty.data.enabled, true);
+
+const enableOk = await worker("/v1/mesh/enable", "POST", { bearer: "suite-presence" });
+assert.equal(enableOk.status, 200);
+assert.equal(enableOk.data.enabled, true);
+
+assert.ok(seen.some((s) => s.method === "GET" && s.href === `${SERVICE_BINDING_ORIGIN}/v1/mesh`));
+assert.ok(seen.some((s) => s.method === "POST" && s.path === "/v1/mesh/enable"));
+
+const unknownMesh = await worker("/v1/mesh/gate", "GET");
+assert.equal(unknownMesh.status, 404);
+assert.equal(unknownMesh.data.code, "MESH-UNKNOWN");
+
 const htmlEnv = {
   FRAGGATE_DOOR: ORIGIN,
   AZIEL_RUNTIME: {
@@ -148,4 +210,4 @@ if (process.env.FRAGGATE_LIVE === "1") {
   assert.equal(liveCallJson.ok, true);
 }
 
-console.log("verify-door-proxy: list/call proxy returns JSON ok");
+console.log("verify-door-proxy: list/call + /v1/mesh proxy returns JSON ok");

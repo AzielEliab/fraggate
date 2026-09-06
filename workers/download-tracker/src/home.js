@@ -46,6 +46,8 @@ export function citePayload() {
     catalog: CATALOG,
     catalog_mcp: CATALOG_MCP,
     catalog_openapi: CATALOG_OPENAPI,
+    mesh: HOST + "/v1/mesh",
+    mesh_catalog: CATALOG + "v1/mesh",
     license: "Apache-2.0",
     license_url: LICENSE,
     one_line: DESCRIPTION,
@@ -58,7 +60,7 @@ export function citePayload() {
     note: "No DOI is invented here. Cite GitHub and this Worker. Identity is Aziel Eliab only. Forks welcome.",
     identity: "Aziel Eliab only",
     forks: "welcome and always allowed",
-    dual_surface: "Worker UI + MCP/OpenAPI share list/describe/call/verify. Canonical agent path is aziel-runtime /mcp + /v1/fraggate/*.",
+    dual_surface: "Worker UI + MCP/OpenAPI share list/describe/call/verify. Suite mesh GET /v1/mesh PROXY (default OFF). Canonical agent path is aziel-runtime /mcp + /v1/fraggate/*.",
   };
 }
 
@@ -96,6 +98,7 @@ function sitemapXml() {
     "/v1/health",
     "/v1/fraggate",
     "/v1/fraggate/list",
+    "/v1/mesh",
     "/openapi.json",
     "/mcp",
     "/cite.json",
@@ -179,6 +182,7 @@ MCP: POST ${HOST}/mcp
 Skill: ${HOST}/v1/skill
 Cite: ${HOST}/cite.json
 Ops (human buttons = OpenAPI = MCP): GET /v1/fraggate/list, GET /v1/fraggate/describe, POST /v1/fraggate/verify, POST /v1/fraggate/call
+Suite mesh: GET ${HOST}/v1/mesh PROXY to aziel-runtime. Default OFF. QNM-BUILD-1.0 live|locked|isolated. No Node Gate. Catalog MCP mesh_* + FragGate slug=mesh.
 Canonical agent path: POST ${CATALOG_MCP} and ${DEFAULT_DOOR}/v1/fraggate/*
 Identity: Aziel Eliab only
 License: Apache-2.0
@@ -331,6 +335,14 @@ export function renderHome(stats, opts = {}) {
   table.matrix { width: 100%; border-collapse: collapse; font-size: .86rem; }
   table.matrix th, table.matrix td { border: 1px solid var(--line); padding: .45rem .5rem; text-align: left; }
   table.matrix th { color: var(--gold); font-weight: 600; }
+  #meshStrip { border: 1px solid var(--gold); border-radius: 14px; padding: .85rem 1rem; background: var(--panel); margin: 0 0 1.1rem; display: flex; flex-wrap: wrap; align-items: center; gap: .7rem 1rem; font-size: .88rem; color: var(--muted); }
+  #meshStrip .live { color: var(--ink); }
+  #meshStrip .live b { color: var(--gold); font-size: 1.35rem; margin-right: .35rem; }
+  #meshStrip .rollup b { color: var(--gold); }
+  #meshStrip button { font: 700 .78rem/1 ui-monospace, Menlo, Consolas, monospace; height: 2rem; padding: 0 .75rem; border-radius: 8px; background: #101010; color: var(--ink); border: 1px solid var(--gold); cursor: pointer; }
+  #meshStrip button:hover { background: #241c0d; color: var(--gold); }
+  #meshStrip input { width: 10rem; padding: .4rem .55rem; border: 1px solid var(--gold); border-radius: 8px; background: #0e0e0e; color: var(--ink); font: inherit; }
+  #meshProducts { flex-basis: 100%; margin: 0; }
 </style>
 </head>
 <body>
@@ -350,6 +362,7 @@ export function renderHome(stats, opts = {}) {
       <p class="lede">v${VERSION} software by <strong>${AUTHOR}</strong> only. Human buttons and MCP/OpenAPI share List / Describe / Call / Verify. The Python kernel stays FG-0.1. Forks are welcome and always allowed.</p>
       <nav class="toc" aria-label="Product sections">
         <a href="#workspace">Use UI</a>
+        <a href="#meshStrip">Live Nodes</a>
         <a href="#install">Download / install</a>
         <a href="#matrix">Button matrix</a>
         <a href="#cite">Cite</a>
@@ -361,9 +374,24 @@ export function renderHome(stats, opts = {}) {
       <p class="banner">${escapeHtml(HONEST)}</p>
     </header>
 
+    <div id="meshStrip" aria-label="Suite Live Nodes">
+      <div class="live"><b id="meshLiveCount">0</b> Live Nodes</div>
+      <div id="meshLine">Suite mesh: off (default). QNM-BUILD-1.0. Not an anonymity network.</div>
+      <div class="rollup">live <b id="qnmLive">0</b> · locked <b id="qnmLocked">0</b> · isolated <b id="qnmIsolated">0</b></div>
+      <div>No Node Gate · No auto-heal · Aziel Eliab only</div>
+      <div>
+        <input id="meshBearer" type="text" maxlength="80" placeholder="bearer (required to enable)" aria-label="mesh bearer">
+        <button id="meshEnable" type="button" title="Enable suite mesh. Declared bearer required. Default off.">Enable</button>
+        <button id="meshDisable" type="button" title="Disable suite mesh (always allowed)">Disable</button>
+        <button id="meshJoin" type="button" title="Join as fraggate. Refused while mesh is OFF. No auto-join.">Join</button>
+        <button id="meshLeave" type="button" title="Leave this node. No auto-heal.">Leave</button>
+      </div>
+      <div id="meshProducts">Catalog MCP mesh_* · FragGate slug=mesh · /v1/mesh/* PROXY · not AnonBroadcast · not AZMail ring · not a Node Gate</div>
+    </div>
+
     <section class="workspace" id="workspace">
       <h2><span class="kicker">Live software</span>FragGate door</h2>
-      <p class="lede">Wired buttons — not chrome. They call this Worker’s <code>/v1/fraggate/*</code> (List / Describe / Call / Verify), which proxies the live catalog door <code>${DEFAULT_DOOR}/v1/fraggate/*</code>. OpenAPI and MCP share those same four ops. FragGate is the door. Canonical agent path: <code>POST ${DEFAULT_DOOR}/mcp</code>.</p>
+      <p class="lede">Wired buttons — not chrome. They call this Worker’s <code>/v1/fraggate/*</code> (List / Describe / Call / Verify), which proxies the live catalog door <code>${DEFAULT_DOOR}/v1/fraggate/*</code>. OpenAPI and MCP share those same four ops. Suite mesh: <code>/v1/mesh/*</code> PROXY (default OFF; QNM live|locked|isolated; no Node Gate; no auto-heal; not anonymity). FragGate is the door. Canonical agent path: <code>POST ${DEFAULT_DOOR}/mcp</code>.</p>
       <div class="workgrid">
         <form id="ws-form" autocomplete="off">
           <label for="door"><span class="kicker">Door</span> Default is this Worker (same-origin <code>/v1/fraggate/*</code> proxy). “Catalog door” talks to aziel-runtime directly. Not AZBrowser.</label>
@@ -435,10 +463,11 @@ export function renderHome(stats, opts = {}) {
           <tr><td>Call op</td><td><code>POST /v1/fraggate/call</code> <code>{slug, op, payload}</code></td><td>Result or typed refuse (FG-HALLUC-TOOL / FG-GATE / FG-STUB) + ledger tip</td></tr>
           <tr><td>Verify</td><td><code>POST /v1/fraggate/verify</code></td><td><code>matched</code> + digest + ledger tip when present</td></tr>
           <tr><td>OpenAPI</td><td><code>/openapi.json</code> and catalog OpenAPI</td><td>Same four paths documented</td></tr>
-          <tr><td>MCP</td><td><code>POST /mcp</code> and catalog <code>POST /mcp</code></td><td>tools: fraggate_list, fraggate_describe, fraggate_verify, fraggate_call</td></tr>
+          <tr><td>MCP</td><td><code>POST /mcp</code> and catalog <code>POST /mcp</code></td><td>tools: fraggate_list, fraggate_describe, fraggate_verify, fraggate_call. Mesh pointer: catalog <code>mesh_*</code> + FragGate <code>slug=mesh</code></td></tr>
+          <tr><td>Live Nodes</td><td><code>GET /v1/mesh</code> PROXY</td><td>Default OFF. QNM live|locked|isolated. GET never enables. No Node Gate</td></tr>
         </tbody>
       </table>
-      <p class="meta">Default door = this Worker. Buttons call same-origin <code>/v1/fraggate/*</code>, which forwards to <code>${DEFAULT_DOOR}</code> (GET list / describe, POST verify / call). Catalog door is the origin itself. Not AZBrowser. Not UI-only.</p>
+      <p class="meta">Default door = this Worker. Buttons call same-origin <code>/v1/fraggate/*</code>, which forwards to <code>${DEFAULT_DOOR}</code> (GET list / describe, POST verify / call). Suite mesh <code>/v1/mesh/*</code> PROXY (default OFF). Catalog door is the origin itself. Not AZBrowser. Not a Node Gate. Not UI-only.</p>
     </section>
 
     <section class="card" id="install">
@@ -454,10 +483,10 @@ export function renderHome(stats, opts = {}) {
       </div>
       <pre id="install-cmd">${INSTALL_LINE}</pre>
       <p class="meta">The download count ticks on the Download click. No 302 to GitHub. ${DEFAULT_ASSET} — ${n} counted.</p>
-      <p class="iso">Isolated counter: Worker <code>fraggate-download-tracker</code>, project <code>fraggate</code>, KV <code>FRAGGATE_DOWNLOADS</code>. /v1 and /mcp do not increment downloads.</p>
+      <p class="iso">Isolated counter: Worker <code>fraggate-download-tracker</code>, project <code>fraggate</code>, KV <code>FRAGGATE_DOWNLOADS</code>. /v1, /mcp, and /v1/mesh/* do not increment downloads.</p>
       <p class="meta">GitHub: stars ${gh.stars || 0} · forks ${gh.forks || 0} · watchers ${gh.watchers || 0} · release assets ${gh.release_download_count || 0}</p>
       <p class="meta">Door kin: <a href="${DEFAULT_DOOR}/">aziel-runtime</a> · <a href="https://decisiongate-download-tracker.vibelock.workers.dev/">DecisionGATE</a> · <a href="https://peacelock-download-tracker.vibelock.workers.dev/">PeaceLock</a> · <a href="https://www.azielcorpuslibrary.net/">library</a> · <a href="https://godlock.uk/">godlock.uk</a> · <a href="https://www.azieleliab.com/">www.azieleliab.com</a></p>
-      <p class="meta"><a href="/stats">JSON stats</a> · <a href="/count">/count</a> · <a href="/openapi.json">OpenAPI</a> · <a href="/v1/skill">Skill</a> · <a href="/v1/example">Example</a> · <a href="/ai">AI runtime</a> · <a href="${GITHUB_REPO}">GitHub</a> · <a href="${GITHUB_LATEST}">releases</a></p>
+      <p class="meta"><a href="/stats">JSON stats</a> · <a href="/count">/count</a> · <a href="/openapi.json">OpenAPI</a> · <a href="/mcp">MCP</a> · <a href="/v1/mesh">/v1/mesh</a> · <a href="/v1/skill">Skill</a> · <a href="/v1/example">Example</a> · <a href="/ai">AI runtime</a> · <a href="${GITHUB_REPO}">GitHub</a> · <a href="${GITHUB_LATEST}">releases</a></p>
       <h3>Per repo / branch / fork</h3>
       <ul>${breakdownList(stats)}</ul>
     </section>
@@ -472,7 +501,7 @@ export function renderHome(stats, opts = {}) {
 
     <footer>
       <p>Apache-2.0 · ${AUTHOR} · FragGate v${VERSION}</p>
-      <p>Not a second kernel. Buttons, OpenAPI, and MCP share List / Describe / Call / Verify.</p>
+      <p>Not a second kernel. Buttons, OpenAPI, and MCP share List / Describe / Call / Verify. Suite mesh default OFF.</p>
     </footer>
   </div>
   <script type="application/json" id="fg-boot">${boot}</script>
@@ -657,6 +686,103 @@ export function renderHome(stats, opts = {}) {
         var pill = $("api-pill");
         if (pill) { pill.textContent = "API down"; pill.className = "pill bad"; }
       });
+      function meshNum() {
+        for (var i = 0; i < arguments.length; i++) {
+          var raw = arguments[i];
+          if (raw == null || raw === "") continue;
+          var n = typeof raw === "number" ? raw : Number(String(raw).replace(/,/g, ""));
+          if (Number.isFinite(n) && n >= 0) return Math.floor(n);
+        }
+        return 0;
+      }
+      function unwrapMesh(j) {
+        if (!j || typeof j !== "object") return {};
+        if (j.result && typeof j.result === "object") return Object.assign({}, j, j.result);
+        if (j.mesh && typeof j.mesh === "object") return Object.assign({}, j, j.mesh);
+        return j;
+      }
+      function paintMesh(raw) {
+        var j = unwrapMesh(raw);
+        var on = j.enabled === true || j.enabled === 1 || String(j.status || "").toLowerCase() === "on";
+        var r = (j.rollup && typeof j.rollup === "object") ? j.rollup : {};
+        var live = on ? meshNum(r.live, j.live_nodes, j.live) : 0;
+        var locked = on ? meshNum(r.locked, j.locked_nodes, j.locked) : 0;
+        var isolated = on ? meshNum(r.isolated, j.isolated_nodes, j.isolated) : 0;
+        $("meshLiveCount").textContent = String(live);
+        $("qnmLive").textContent = String(live);
+        $("qnmLocked").textContent = String(locked);
+        $("qnmIsolated").textContent = String(isolated);
+        var line = $("meshLine");
+        if (on) line.textContent = "Suite mesh: on · live " + live + " · locked " + locked + " · isolated " + isolated + ". Not an anonymity network.";
+        else if (j.status === "unavailable" || (j.ok === false && j.error)) line.textContent = "Suite mesh: off (unavailable). QNM-BUILD-1.0. Not an anonymity network.";
+        else line.textContent = "Suite mesh: off (default). QNM-BUILD-1.0. Not an anonymity network.";
+        var products = j.products_present || j.products || [];
+        var names = Array.isArray(products) ? products.map(function (p) { return typeof p === "string" ? p : (p && (p.product || p.slug)) || ""; }).filter(Boolean) : [];
+        var nodes = Array.isArray(j.nodes) ? j.nodes : [];
+        var extra = names.length ? " · products " + names.join(", ") : (nodes.length ? " · " + nodes.length + " node labels" : "");
+        $("meshProducts").textContent = "Catalog MCP mesh_* · FragGate slug=mesh · /v1/mesh/* PROXY · not AnonBroadcast · not AZMail ring · not a Node Gate" + extra;
+      }
+      async function meshGet(path) {
+        var r = await fetch(path, { headers: { "user-agent": "Mozilla/5.0", accept: "application/json" } });
+        return r.json();
+      }
+      async function meshPost(path, payload) {
+        var r = await fetch(path, { method: "POST", headers: { "content-type": "application/json", "user-agent": "Mozilla/5.0" }, body: JSON.stringify(payload || {}) });
+        return r.json();
+      }
+      async function refreshMesh() {
+        try {
+          var status = await meshGet("/v1/mesh");
+          var merged = status;
+          var inner = unwrapMesh(status);
+          var on = inner.enabled === true;
+          if (on) {
+            try {
+              var nodes = await meshGet("/v1/mesh/nodes");
+              merged = Object.assign({}, inner, unwrapMesh(nodes));
+            } catch (e) { /* status is enough */ }
+          }
+          paintMesh(merged);
+          var nodeId = sessionStorage.getItem("fraggate_mesh_node");
+          if (on && nodeId) {
+            try { await meshPost("/v1/mesh/heartbeat", { node_id: nodeId }); } catch (e) { /* no auto-heal */ }
+          }
+        } catch (e) {
+          paintMesh({ ok: false, enabled: false, status: "unavailable", error: "mesh_unavailable" });
+        }
+      }
+      $("meshEnable").onclick = async function () {
+        var bearer = ($("meshBearer").value || "").trim();
+        paintMesh(await meshPost("/v1/mesh/enable", bearer ? { bearer: bearer } : {}));
+        refreshMesh();
+      };
+      $("meshDisable").onclick = async function () {
+        sessionStorage.removeItem("fraggate_mesh_node");
+        paintMesh(await meshPost("/v1/mesh/disable", {}));
+        refreshMesh();
+      };
+      $("meshJoin").onclick = async function () {
+        var j = await meshPost("/v1/mesh/join", { product: "fraggate", label: "FragGate Worker" });
+        var inner = unwrapMesh(j);
+        var id = inner.node_id || inner.id || (inner.session && inner.session.node_id);
+        if (id) sessionStorage.setItem("fraggate_mesh_node", String(id));
+        paintMesh(j);
+        refreshMesh();
+      };
+      $("meshLeave").onclick = async function () {
+        var id = sessionStorage.getItem("fraggate_mesh_node");
+        if (id) await meshPost("/v1/mesh/leave", { node_id: id });
+        sessionStorage.removeItem("fraggate_mesh_node");
+        refreshMesh();
+      };
+      window.addEventListener("pagehide", function () {
+        var id = sessionStorage.getItem("fraggate_mesh_node");
+        if (!id || typeof navigator.sendBeacon !== "function") return;
+        try { navigator.sendBeacon("/v1/mesh/leave", new Blob([JSON.stringify({ node_id: id })], { type: "application/json" })); } catch (e) { /* leave expires in 5 minutes */ }
+      });
+      refreshMesh();
+      setInterval(refreshMesh, 30000);
+      document.addEventListener("visibilitychange", function () { if (!document.hidden) refreshMesh(); });
     })();
   </script>
 </body>
