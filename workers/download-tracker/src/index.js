@@ -305,6 +305,15 @@ export default {
       return serveAsset(request, env, asset, { head: request.method === "HEAD" });
     }
 
+    if (env.ASSETS && (request.method === "GET" || request.method === "HEAD")) {
+      try {
+        const assetRes = await env.ASSETS.fetch(request);
+        if (assetRes && assetRes.status !== 404) return assetRes;
+      } catch {
+        /* counted routes already handled; missing asset stays 404 JSON */
+      }
+    }
+
     return json({ error: "not found", product: PROJECT, version: VERSION }, 404);
   },
 };

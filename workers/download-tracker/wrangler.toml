@@ -16,10 +16,19 @@ id = "00000000000000000000000000000000"
 [vars]
 FRAGGATE_DOOR = "https://aziel-runtime.vibelock.workers.dev"
 
+# Same-account door. Public `*.vibelock.workers.dev` subrequests can miss
+# the origin Worker (assets / hostname-ignored 404 HTML). Binding is the
+# aziel-runtime upstreamFetch pattern. Parent deploy wires it.
+[[services]]
+binding = "AZIEL_RUNTIME"
+service = "aziel-runtime"
+
 [assets]
 directory = "./public"
 binding = "ASSETS"
-run_worker_first = ["/", "/download", "/download/*", "/stats", "/event", "/go", "/count", "/install.sh", "/v1", "/v1/*", "/openapi.json", "/ai", "/ai/*", "/mcp", "/mcp/", "/robots.txt", "/sitemap.xml", "/cite.json", "/llms.txt", "/ai.txt"]
+# Worker first so `/v1/fraggate/*` is never an assets 404. Static files
+# (`/sigil.png`, tarball) fall through to env.ASSETS in src/index.js.
+run_worker_first = true
 
 [observability]
 enabled = true

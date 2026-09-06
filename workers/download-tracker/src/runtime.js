@@ -469,12 +469,14 @@ export async function handleRuntimeApi(request, url, env) {
     });
   }
 
-  if (path === "/v1/fraggate" && request.method === "GET") {
+  if (path === "/v1/fraggate" && (request.method === "GET" || request.method === "HEAD" || request.method === "POST")) {
     const out = await runFragGateOp(env, "summary", {}, request);
+    if (request.method === "HEAD") return new Response(null, { status: out.status, headers: extra });
     return json(out.data, out.status, extra);
   }
-  if (path === "/v1/fraggate/list" && request.method === "GET") {
+  if (path === "/v1/fraggate/list" && (request.method === "GET" || request.method === "HEAD" || request.method === "POST")) {
     const out = await runFragGateOp(env, "list", {}, request);
+    if (request.method === "HEAD") return new Response(null, { status: out.status, headers: extra });
     return json(out.data, out.status, extra);
   }
   if (path === "/v1/fraggate/describe" && (request.method === "GET" || request.method === "POST")) {

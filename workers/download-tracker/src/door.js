@@ -31,10 +31,91 @@ export function corsHeaders() {
   };
 }
 
+/**
+ * Normalize a door origin. Strips trailing slashes and a trailing
+ * `/v1/fraggate` so spec paths can be appended once.
+ */
+export function normalizeDoorOrigin(raw) {
+  let s = String(raw == null ? "" : raw).trim();
+  if (!s) return DEFAULT_DOOR;
+  s = s.replace(/^['"]+|['"]+$/g, "");
+  s = s.replace(/\/+$/, "");
+  s = s.replace(/\/v1\/fraggate$/i, "");
+  s = s.replace(/\/+$/, "");
+  return s || DEFAULT_DOOR;
+}
+
 export function doorBase(env) {
-  const raw = env && typeof env.FRAGGATE_DOOR === "string" ? env.FRAGGATE_DOOR.trim() : "";
-  if (raw) return raw.replace(/\/+$/, "");
-  return DEFAULT_DOOR;
+  const asUrl = (value) => (typeof value === "string" && value.trim() ? normalizeDoorOrigin(value) : "");
+  return asUrl(env && env.FRAGGATE_DOOR) || asUrl(env && env.AZIEL_RUNTIME) || DEFAULT_DOOR;
+}
+
+/**
+ * Join door origin + FragGate path without doubling `/v1/fraggate`.
+ * Origin list is GET `/v1/fraggate/list`. Origin call is POST `/v1/fraggate/call`.
+ */
+export function joinDoorUrl(base, pathAndQuery) {
+  const origin = normalizeDoorOrigin(base);
+  const raw = String(pathAndQuery == null ? "" : pathAndQuery);
+  const qIndex = raw.indexOf("?");
+  const pathOnly = qIndex >= 0 ? raw.slice(0, qIndex) : raw;
+  const query = qIndex >= 0 ? raw.slice(qIndex) : "";
+  let path = pathOnly.startsWith("/") ? pathOnly : `/${pathOnly}`;
+  path = path.replace(/\/{2,}/g, "/");
+  path = path.replace(/^(?:\/v1\/fraggate)+/i, "/v1/fraggate");
+  if (path === "/" || path === "") path = "/v1/fraggate";
+  else if (!/^\/v1\/fraggate(\/|$)/i.test(path)) path = `/v1/fraggate${path === "/" ? "" : path}`;
+  return origin + path + query;
+}
+
+export function doorService(env) {
+  if (!env) return null;
+  for (const key of ["AZIEL_RUNTIME", "FRAGGATE_DOOR_SERVICE", "RUNTIME"]) {
+    const bind = env[key];
+    if (bind && typeof bind === "object" && typeof bind.fetch === "function") return bind;
+  }
+  return null;
+}
+
+function isSelfDoorUrl(url, request) {
+  try {
+    const there = new URL(url).origin;
+    if (there === HOST) return true;
+    if (request && request.url) {
+      const here = new URL(request.url).origin;
+      if (here && here === there) return true;
+    }
+  } catch {
+    /* ignore */
+  }
+  return false;
+}
+
+/**
+ * Fetch one door path. Prefer the aziel-runtime service binding so
+ * same-zone `*.vibelock.workers.dev` subrequests do not miss the
+ * origin Worker (assets / hostname-ignored 404 HTML → FG-ERR non-JSON).
+ */
+export async function doorFetch(env, pathAndQuery, init, request) {
+  const headers = new Headers((init && init.headers) || {});
+  if (!headers.has("User-Agent") && !headers.has("user-agent")) headers.set("User-Agent", "Mozilla/5.0");
+  if (!headers.has("Accept") && !headers.has("accept")) headers.set("Accept", "application/json");
+  headers.set("X-Aziel-Runtime-Via", "fraggate-download-tracker");
+  const next = { ...(init || {}), headers };
+  if (!next.signal && typeof AbortSignal !== "undefined" && typeof AbortSignal.timeout === "function") {
+    next.signal = AbortSignal.timeout(20000);
+  }
+
+  const bind = doorService(env);
+  if (bind) {
+    return bind.fetch(new Request("https://aziel-runtime.internal" + pathAndQuery, next));
+  }
+
+  const url = joinDoorUrl(doorBase(env), pathAndQuery);
+  if (isSelfDoorUrl(url, request)) {
+    throw new Error("Door URL points at this Worker — refusing self-fetch loop.");
+  }
+  return fetch(url, next);
 }
 
 export function json(body, status = 200, extraHeaders = {}) {
@@ -122,14 +203,19 @@ export async function runFragGateOp(env, op, params = {}, request) {
     }
   }
 
-  const url = doorBase(env) + path;
+  const url = joinDoorUrl(doorBase(env), path);
   let res;
   try {
-    res = await fetch(url, {
-      method,
-      headers,
-      body: body !== undefined ? JSON.stringify(body) : undefined,
-    });
+    res = await doorFetch(
+      env,
+      path,
+      {
+        method,
+        headers,
+        body: body !== undefined ? JSON.stringify(body) : undefined,
+      },
+      request,
+    );
   } catch (err) {
     return {
       status: 502,
@@ -154,20 +240,32 @@ export async function runFragGateOp(env, op, params = {}, request) {
         code: "FG-ERR",
         door: "fraggate",
         message: "Door response too large for this Worker proxy.",
+        door_url: url,
       },
     };
   }
 
+  const text = await res.text();
   let data;
   try {
-    data = await res.json();
+    data = text ? JSON.parse(text) : null;
   } catch {
-    data = {
-      ok: false,
-      code: "FG-ERR",
-      door: "fraggate",
-      message: "Door returned non-JSON.",
-      http_status: res.status,
+    data = null;
+  }
+  if (!data || typeof data !== "object") {
+    const preview = String(text || "").replace(/\s+/g, " ").slice(0, 160);
+    return {
+      status: res.status || 502,
+      data: {
+        ok: false,
+        code: "FG-ERR",
+        door: "fraggate",
+        message: "Door returned non-JSON.",
+        http_status: res.status,
+        content_type: res.headers.get("Content-Type") || "",
+        door_url: url,
+        preview,
+      },
     };
   }
   return { status: res.status, data };

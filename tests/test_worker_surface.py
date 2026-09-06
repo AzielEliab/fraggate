@@ -64,11 +64,12 @@ def test_four_ops_shared_across_surfaces() -> None:
     assert "btn-live" in home
     assert "FG-HALLUC-TOOL" in home
     assert "ledger_tip" in home or "last-tip" in home
-    assert 'value="${escapeHtml(DEFAULT_DOOR)}"' in home
+    assert 'value="${escapeHtml(HOST)}"' in home
     assert "hit(\"/v1/fraggate/list\"" in home
     assert "hit(\"/v1/fraggate/call\"" in home
     assert "TODO" not in home
     assert "coming soon" not in home.lower()
+    assert "Not AZBrowser" in home or "Not AZBrowser" in _read("README.md")
 
 
 def test_mcp_and_openapi_double_buttons() -> None:
@@ -117,3 +118,34 @@ def test_mobile_scaffold() -> None:
     dart = (ROOT / "mobile" / "lib" / "main.dart").read_text(encoding="utf-8")
     assert "fraggate_list" in dart
     assert "fraggate_call" in dart
+
+
+def test_door_proxy_joins_origin_paths() -> None:
+    door = _read("src/door.js")
+    toml = _read("wrangler.toml")
+    runtime = _read("src/runtime.js")
+    assert "joinDoorUrl" in door
+    assert "doorFetch" in door
+    assert "doorService" in door
+    assert "AZIEL_RUNTIME" in door
+    assert "normalizeDoorOrigin" in door
+    assert "binding = \"AZIEL_RUNTIME\"" in toml
+    assert 'service = "aziel-runtime"' in toml
+    assert "run_worker_first = true" in toml
+    assert "FRAGGATE_DOOR" in toml
+    assert 'path === "/v1/fraggate/list"' in runtime
+    assert "runFragGateOp(env, \"list\"" in runtime
+    assert "runFragGateOp(env, \"call\"" in runtime
+
+
+def test_verify_door_proxy_script() -> None:
+    import shutil
+    import subprocess
+
+    script = WORKER / "scripts" / "verify-door-proxy.mjs"
+    assert script.is_file()
+    node = shutil.which("node")
+    assert node, "node is required for the Worker door-proxy script"
+    proc = subprocess.run([node, str(script)], cwd=WORKER, capture_output=True, text=True, timeout=30)
+    assert proc.returncode == 0, proc.stdout + proc.stderr
+    assert "JSON ok" in proc.stdout
