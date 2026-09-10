@@ -1,6 +1,7 @@
-"""Suite mesh Live Nodes + QNM-BUILD-1.0 contract.
+"""Suite mesh Live Nodes + QNM-BUILD-1.0 + QNS-CD-1.0 contract.
 
 Default OFF. live|locked|isolated. No Node Gate. No auto-heal. Not anonymity.
+QNS-CD-1.0 is a hub cite / Worker mesh cross-map only. No public qnsd proxy.
 """
 
 from __future__ import annotations
@@ -21,6 +22,15 @@ WORKER_README = (ROOT / "workers/download-tracker/README.md").read_text(encoding
 
 def test_mesh_contract_default_off_qnm_law() -> None:
     assert 'QNM_SPEC = "QNM-BUILD-1.0"' in MESH
+    assert 'QNS_CD_SPEC = "QNS-CD-1.0"' in MESH
+    assert "export const QNS_CD" in MESH
+    assert "photon QNS1 packet transfer" in MESH
+    assert "https://github.com/AzielEliab/qnm-node" in MESH
+    assert "https://github.com/AzielEliab/aziel-runtime" in MESH
+    assert "https://github.com/AzielEliab/azinterface" in MESH
+    assert "public_qnsd_proxy: false" in MESH
+    assert "softwares_tab: false" in MESH
+    assert "QNS-CD-1.0" in MESH
     assert "MESH_DEFAULT_OFF = true" in MESH
     assert "MESH_ANONYMITY_NETWORK = false" in MESH
     assert "MESH_NODE_GATE = false" in MESH
@@ -32,6 +42,14 @@ def test_mesh_contract_default_off_qnm_law() -> None:
     assert "enabled_default: false" in MESH
     assert "anon_broadcast_publish_path: false" in MESH
     assert "Aziel Eliab" in MESH
+    assert "QNS-CD-1.0" in MESH_NOTE_SOURCE()
+
+
+def MESH_NOTE_SOURCE() -> str:
+    marker = "export const MESH_NOTE ="
+    start = MESH.find(marker)
+    assert start != -1
+    return MESH[start : start + 600]
 
 
 def test_mesh_pointer_and_openapi_helpers() -> None:
@@ -39,9 +57,12 @@ def test_mesh_pointer_and_openapi_helpers() -> None:
     assert "export function meshOpenApiPaths" in MESH
     assert "export function parseMeshDoc" in MESH
     assert "export function emptyMesh" in MESH
+    assert "export function attachQnsCd" in MESH
     assert "export function alignLiveNodes" in MESH
     assert "fraggate_slug: MESH_SLUG" in MESH
     assert "fraggate_mesh_" in MESH
+    assert "qns_cd: QNS_CD" in MESH
+    assert "qns_cd_spec: QNS_CD_SPEC" in MESH
 
 
 def test_door_proxies_mesh_via_aziel_runtime() -> None:
@@ -91,11 +112,21 @@ def test_docs_advertise_mesh_proxy() -> None:
     assert "/v1/mesh" in README
     assert "/v1/mesh" in SKILL
     assert "QNM-BUILD-1.0" in WORKER_README
+    assert "QNS-CD-1.0" in README
+    assert "QNS-CD-1.0" in SKILL
+    assert "QNS-CD-1.0" in WORKER_README
+    assert "QNS-CD-1.0" in RUNTIME
+    assert "QNS-CD-1.0" in HOME
+    assert "photon QNS1" in README
+    assert "photon QNS1" in SKILL
+    assert "No public qnsd proxy" in README
+    assert "No public qnsd proxy" in SKILL
     assert "AZIEL_RUNTIME" in WORKER_README
     assert "Live Nodes" in WORKER_README
     assert "Aziel Eliab" in MESH
     assert "GET never enables" in DOOR
     assert "GET /v1/mesh never enables" in RUNTIME
     assert "GET /v1/mesh never enables" in HOME
+    assert "attachQnsCd" in DOOR
     assert "Aziel Eliab only" in RUNTIME
     assert "Aziel Eliab only" in HOME

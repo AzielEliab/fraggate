@@ -49,7 +49,7 @@ This Worker **doubles** those four ops (proxy, not a second kernel):
 - OpenAPI: https://fraggate-download-tracker.vibelock.workers.dev/openapi.json
 - MCP: `POST https://fraggate-download-tracker.vibelock.workers.dev/mcp`
 - Same routes: `/v1/fraggate/list` · `/describe` · `/verify` · `/call`
-- Suite mesh PROXY: `/v1/mesh/*` via `AZIEL_RUNTIME`. Default OFF. GET /v1/mesh never enables. QNM-BUILD-1.0 live|locked|isolated. No Node Gate. Catalog MCP `mesh_*` + FragGate `slug=mesh`.
+- Suite mesh PROXY: `/v1/mesh/*` via `AZIEL_RUNTIME`. Default OFF. GET /v1/mesh never enables. QNM-BUILD-1.0 live|locked|isolated. QNS-CD-1.0 photon QNS1 packet transfer is a hub cite / Worker mesh cross-map only (local qnsd in https://github.com/AzielEliab/qnm-node; runtime cites + catalog field in https://github.com/AzielEliab/aziel-runtime; pair custody in https://github.com/AzielEliab/azinterface). Not a Softwares-tab product. No public qnsd proxy. No Node Gate. Catalog MCP `mesh_*` + FragGate `slug=mesh`.
 - Suite designs: https://github.com/AzielEliab/fraggate/blob/main/docs/designs/README.md — SEC-FEAT-1.0, AZL-WP-1.1, AZL-VOL-1.0.
 
 ## Suite designs
@@ -61,7 +61,7 @@ Papers in `docs/designs/` (author Aziel Eliab only). Cite the GitHub files; do n
 - AZL-WP-1.1: https://github.com/AzielEliab/fraggate/blob/main/docs/designs/AZL-WP-1.1.md
 - AZL-VOL-1.0: https://github.com/AzielEliab/fraggate/blob/main/docs/designs/AZL-VOL-1.0.md
 
-GET /v1/mesh never enables. Identity Aziel Eliab only.
+GET /v1/mesh never enables. QNS-CD-1.0 is a hub cite / Worker mesh cross-map only — not a Softwares-tab product and not a public qnsd proxy. Identity Aziel Eliab only.
 
 MCP tools that map 1:1 to the human buttons: `fraggate_list`,
 `fraggate_describe`, `fraggate_verify`, `fraggate_call` (+ `runtime_skill`).

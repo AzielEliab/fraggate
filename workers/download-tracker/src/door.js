@@ -6,9 +6,12 @@
  * `/v1/fraggate/*` is the door. `/v1/mesh/*` is the suite QNM rollup
  * PROXY (AZIEL_RUNTIME / https://aziel-runtime.vibelock.workers.dev).
  * Mesh paths are never rewritten onto `/v1/fraggate`.
+ * QNS-CD-1.0 is a hub cite / Worker mesh cross-map only (no qnsd proxy).
  *
  * Author: Aziel Eliab only. Apache-2.0.
  */
+
+import { attachQnsCd, QNS_CD, QNS_CD_SPEC } from "./mesh.js";
 
 export const DEFAULT_DOOR = "https://aziel-runtime.vibelock.workers.dev";
 export const KERNEL = "https://github.com/AzielEliab/fraggate";
@@ -208,12 +211,14 @@ export async function originFetch(env, pathAndQuery, init, request) {
 }
 
 function meshErrFields({ message, door_url, http_status, content_type, via, extra }) {
-  return {
+  return attachQnsCd({
     ok: false,
     code: "MESH-ERR",
     door: "mesh",
     kernel: "mesh",
     spec: "QNM-BUILD-1.0",
+    qns_cd: QNS_CD,
+    qns_cd_spec: QNS_CD_SPEC,
     author: AUTHOR,
     identity: AUTHOR,
     node_gate: false,
@@ -225,7 +230,7 @@ function meshErrFields({ message, door_url, http_status, content_type, via, extr
     content_type: content_type || "",
     via: via || "",
     ...(extra || {}),
-  };
+  });
 }
 
 /**
@@ -357,7 +362,7 @@ export async function runMeshProxy(env, request, pathAndQuery) {
       }),
     };
   }
-  return { status: res.status, data };
+  return { status: res.status, data: attachQnsCd(data) };
 }
 
 export function json(body, status = 200, extraHeaders = {}) {
