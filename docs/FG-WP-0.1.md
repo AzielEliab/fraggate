@@ -128,7 +128,7 @@ aziel-runtime remains the public mesh: catalog, pull, session, in-process engine
 
 ## 12. Suite designs
 
-Related suite papers (not this kernel paper) live in [docs/designs/](designs/README.md): [SEC-FEAT-1.0](designs/SEC-FEAT-1.0.md), [AZL-WP-1.1](designs/AZL-WP-1.1.md), [AZL-VOL-1.0](designs/AZL-VOL-1.0.md). Author: Aziel Eliab only. `GET /v1/mesh` never enables.
+Related suite papers (not this kernel paper) live in [docs/designs/](designs/README.md): [SEC-FEAT-1.0](designs/SEC-FEAT-1.0.md), [AZL-WP-1.1](designs/AZL-WP-1.1.md), [AZL-VOL-1.0](designs/AZL-VOL-1.0.md). Author: Aziel Eliab only. GET /v1/mesh never enables.
 
 ## 13. Cite
 
