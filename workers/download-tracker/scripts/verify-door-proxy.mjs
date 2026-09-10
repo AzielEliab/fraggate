@@ -16,7 +16,7 @@ import {
   HOST,
 } from "../src/door.js";
 import { handleRuntimeApi } from "../src/runtime.js";
-import { meshPointer } from "../src/mesh.js";
+import { meshPointer, QNS_CD, QNS_CD_SPEC } from "../src/mesh.js";
 
 const ORIGIN = "https://aziel-runtime.vibelock.workers.dev";
 
@@ -36,6 +36,16 @@ assert.equal(joinDoorUrl(ORIGIN, "/v1/mesh"), `${ORIGIN}/v1/fraggate/v1/mesh`);
 assert.equal(meshPointer().enabled_default, false);
 assert.equal(meshPointer().node_gate, false);
 assert.equal(meshPointer().rollup, "live|locked|isolated");
+assert.equal(QNS_CD_SPEC, "QNS-CD-1.0");
+assert.equal(meshPointer().qns_cd_spec, "QNS-CD-1.0");
+assert.equal(meshPointer().qns_cd.spec, "QNS-CD-1.0");
+assert.equal(meshPointer().qns_cd.title, "photon QNS1 packet transfer");
+assert.equal(meshPointer().qns_cd.public_qnsd_proxy, false);
+assert.equal(meshPointer().qns_cd.softwares_tab, false);
+assert.equal(meshPointer().qns_cd.local_node, "https://github.com/AzielEliab/qnm-node");
+assert.equal(meshPointer().qns_cd.runtime, "https://github.com/AzielEliab/aziel-runtime");
+assert.match(meshPointer().note, /QNS-CD-1.0/);
+assert.equal(QNS_CD.spec, "QNS-CD-1.0");
 
 function jsonRes(body, status = 200) {
   return new Response(JSON.stringify(body), {
@@ -152,6 +162,9 @@ assert.equal(meshOp.data.ok, true);
 assert.equal(meshOp.data.enabled, false);
 assert.equal(meshOp.data.code, "MESH-OK");
 assert.deepEqual(meshOp.data.rollup, { live: 0, locked: 0, isolated: 0 });
+assert.equal(meshOp.data.qns_cd_spec, "QNS-CD-1.0");
+assert.equal(meshOp.data.qns_cd.spec, "QNS-CD-1.0");
+assert.equal(meshOp.data.qns_cd.public_qnsd_proxy, false);
 
 const meshHttp = await worker("/v1/mesh", "GET");
 assert.equal(meshHttp.status, 200);

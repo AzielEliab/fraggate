@@ -31,7 +31,7 @@ This Worker (`fraggate-download-tracker`) **doubles** those ops (proxy, not a se
 - OpenAPI: https://fraggate-download-tracker.vibelock.workers.dev/openapi.json
 - MCP: `POST https://fraggate-download-tracker.vibelock.workers.dev/mcp`
 - Routes: `/v1/fraggate/list` · `/describe` · `/verify` · `/call`
-- Suite mesh PROXY: `/v1/mesh/*` via `AZIEL_RUNTIME` / `https://aziel-runtime.vibelock.workers.dev`. Default OFF. QNM-BUILD-1.0 live|locked|isolated. No Node Gate. Catalog MCP `mesh_*` + FragGate `slug=mesh`.
+- Suite mesh PROXY: `/v1/mesh/*` via `AZIEL_RUNTIME` / `https://aziel-runtime.vibelock.workers.dev`. Default OFF. QNM-BUILD-1.0 live|locked|isolated. QNS-CD-1.0 photon QNS1 packet transfer is a hub cite / Worker mesh cross-map only (local qnsd in [qnm-node](https://github.com/AzielEliab/qnm-node); runtime cites + catalog field in [aziel-runtime](https://github.com/AzielEliab/aziel-runtime); pair custody in [AZInterface](https://github.com/AzielEliab/azinterface)). Not a Softwares-tab product. No public qnsd proxy. No Node Gate. Catalog MCP `mesh_*` + FragGate `slug=mesh`.
 
 The Python kernel is unchanged FG-0.1. Do not open a second kernel for the same session.
 
@@ -120,7 +120,7 @@ Human UI: https://fraggate-download-tracker.vibelock.workers.dev/
 | Verify | `POST /v1/fraggate/verify` | `matched` + digest |
 | OpenAPI | `/openapi.json` and catalog OpenAPI | Same four paths |
 | MCP | `POST /mcp` and catalog `POST /mcp` | `fraggate_list`, `fraggate_describe`, `fraggate_verify`, `fraggate_call`. Mesh pointer: catalog `mesh_*` + FragGate `slug=mesh` |
-| Live Nodes | `GET /v1/mesh` PROXY | Default OFF. QNM live\|locked\|isolated. GET never enables. No Node Gate |
+| Live Nodes | `GET /v1/mesh` PROXY | Default OFF. QNM live\|locked\|isolated. QNS-CD-1.0 cross-map (photon QNS1; no qnsd proxy). GET never enables. No Node Gate |
 
 Default door in the UI is **this Worker**. Buttons call same-origin `/v1/fraggate/*`, which proxies to `https://aziel-runtime.vibelock.workers.dev` (service binding `AZIEL_RUNTIME`, then public URL). Origin methods: **GET** list/describe, **POST** verify/call. Suite mesh `/v1/mesh/*` PROXY (default OFF). “Catalog door” talks to aziel-runtime directly. Not AZBrowser. Not a Node Gate.
 

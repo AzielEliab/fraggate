@@ -3,6 +3,7 @@
  * The four human buttons (List, Describe, Call, Verify) hit these same ops.
  * This is not a second kernel. Agent path on aziel-runtime is /mcp + /v1/fraggate/*.
  * `/v1/mesh/*` PROXY to aziel-runtime via AZIEL_RUNTIME (suite QNM rollup).
+ * QNS-CD-1.0 is a hub cite / Worker mesh cross-map only (no public qnsd proxy).
  *
  * Author: Aziel Eliab only. Apache-2.0.
  */
@@ -72,7 +73,7 @@ This Worker **doubles** those four ops (proxy, not a second kernel):
 - OpenAPI: \`${HOST}/openapi.json\`
 - MCP: \`POST ${HOST}/mcp\`
 - Same routes: \`${HOST}/v1/fraggate/list|describe|verify|call\`
-- Suite mesh PROXY: \`${HOST}/v1/mesh/*\` (AZIEL_RUNTIME). Default OFF. GET /v1/mesh never enables. QNM-BUILD-1.0 live|locked|isolated. No Node Gate. Catalog MCP \`mesh_*\` + FragGate \`slug=mesh\`.
+- Suite mesh PROXY: \`${HOST}/v1/mesh/*\` (AZIEL_RUNTIME). Default OFF. GET /v1/mesh never enables. QNM-BUILD-1.0 live|locked|isolated. QNS-CD-1.0 photon QNS1 packet transfer is a hub cite / Worker mesh cross-map only (local qnsd in https://github.com/AzielEliab/qnm-node; runtime cites + catalog field in https://github.com/AzielEliab/aziel-runtime; pair custody in https://github.com/AzielEliab/azinterface). Not a Softwares-tab product. No public qnsd proxy. No Node Gate. Catalog MCP \`mesh_*\` + FragGate \`slug=mesh\`.
 - Suite designs: \`https://github.com/AzielEliab/fraggate/blob/main/docs/designs/README.md\` — SEC-FEAT-1.0, AZL-WP-1.1, AZL-VOL-1.0.
 
 Always send \`User-Agent: Mozilla/5.0\`. Cloudflare Workers may 403 an empty agent.
@@ -172,7 +173,7 @@ export function openapiSpec(origin, env) {
         door +
         "). Suite mesh /v1/mesh/* PROXY to " +
         door +
-        " (AZIEL_RUNTIME). Default OFF. QNM-BUILD-1.0 live|locked|isolated. No Node Gate. Catalog MCP mesh_* + FragGate slug=mesh. Canonical agent path: POST " +
+        " (AZIEL_RUNTIME). Default OFF. QNM-BUILD-1.0 live|locked|isolated. QNS-CD-1.0 photon QNS1 packet transfer is a hub cite / Worker mesh cross-map only (no public qnsd proxy). No Node Gate. Catalog MCP mesh_* + FragGate slug=mesh. Canonical agent path: POST " +
         door +
         "/mcp and " +
         door +
@@ -311,7 +312,7 @@ function aiHtml(origin, env) {
 <p class="banner">Dual surface. Human UI is the Worker homepage. Agent path is MCP/OpenAPI over the same List / Describe / Call / Verify ops. Not a second kernel. Author Aziel Eliab.</p>
 <p>Canonical agent door: <code>POST ${door}/mcp</code> and <code>${door}/v1/fraggate/*</code></p>
 <p>This Worker doubles those four ops: <code>POST ${origin}/mcp</code> · <a href="${origin}/openapi.json">${origin}/openapi.json</a> · <a href="${origin}/v1/skill">skill</a></p>
-<p>Suite mesh: <code>GET ${origin}/v1/mesh</code> PROXY to aziel-runtime. Default OFF. QNM-BUILD-1.0 live|locked|isolated. No Node Gate. Catalog MCP <code>mesh_*</code> + FragGate <code>slug=mesh</code>. Author: Aziel Eliab only.</p>
+<p>Suite mesh: <code>GET ${origin}/v1/mesh</code> PROXY to aziel-runtime. Default OFF. QNM-BUILD-1.0 live|locked|isolated. QNS-CD-1.0 photon QNS1 packet transfer is a hub cite / Worker mesh cross-map only (no public qnsd proxy). No Node Gate. Catalog MCP <code>mesh_*</code> + FragGate <code>slug=mesh</code>. Author: Aziel Eliab only.</p>
 <pre>curl -sS -A 'Mozilla/5.0' ${origin}/v1/fraggate/list
 curl -sS -A 'Mozilla/5.0' '${origin}/v1/fraggate/describe?name=decisiongate'
 curl -sS -A 'Mozilla/5.0' -X POST ${origin}/v1/fraggate/verify -H 'content-type: application/json' -d '{"slug":"decisiongate"}'
@@ -332,7 +333,7 @@ function mcpInitialize(env) {
       doorBase(env) +
       "/mcp and " +
       doorBase(env) +
-      "/v1/fraggate/*. Suite mesh /v1/mesh/* PROXY via AZIEL_RUNTIME (default OFF; QNM live|locked|isolated; no Node Gate). Catalog MCP mesh_* + FragGate slug=mesh. Start with runtime_skill or fraggate_list. Unknown names refuse FG-HALLUC-TOOL. Show display and refuse codes. Author Aziel Eliab only.",
+      "/v1/fraggate/*. Suite mesh /v1/mesh/* PROXY via AZIEL_RUNTIME (default OFF; QNM live|locked|isolated; QNS-CD-1.0 hub cite / Worker mesh cross-map only; no public qnsd proxy; no Node Gate). Catalog MCP mesh_* + FragGate slug=mesh. Start with runtime_skill or fraggate_list. Unknown names refuse FG-HALLUC-TOOL. Show display and refuse codes. Author Aziel Eliab only.",
   };
 }
 
@@ -440,7 +441,7 @@ export async function handleRuntimeApi(request, url, env) {
         worker_openapi: originOf(request) + "/openapi.json",
         ops: ["fraggate_list", "fraggate_describe", "fraggate_verify", "fraggate_call", "runtime_skill"],
         mesh: meshPointer(),
-        note: "POST JSON-RPC here to double the human buttons. Canonical agent path is the catalog MCP on aziel-runtime. Catalog MCP mesh_* + FragGate slug=mesh. This Worker /v1/mesh/* PROXY to aziel-runtime via AZIEL_RUNTIME. Suite mesh default OFF. QNM rollup live|locked|isolated. No Node Gate.",
+        note: "POST JSON-RPC here to double the human buttons. Canonical agent path is the catalog MCP on aziel-runtime. Catalog MCP mesh_* + FragGate slug=mesh. This Worker /v1/mesh/* PROXY to aziel-runtime via AZIEL_RUNTIME. Suite mesh default OFF. QNM rollup live|locked|isolated. QNS-CD-1.0 photon QNS1 packet transfer is a hub cite / Worker mesh cross-map only. No public qnsd proxy. No Node Gate.",
         author: AUTHOR,
       };
       if (request.method === "HEAD") return new Response(null, { status: 200, headers: extra });

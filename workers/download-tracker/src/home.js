@@ -187,7 +187,7 @@ MCP: POST ${HOST}/mcp
 Skill: ${HOST}/v1/skill
 Cite: ${HOST}/cite.json
 Ops (human buttons = OpenAPI = MCP): GET /v1/fraggate/list, GET /v1/fraggate/describe, POST /v1/fraggate/verify, POST /v1/fraggate/call
-Suite mesh: GET ${HOST}/v1/mesh PROXY to aziel-runtime. Default OFF. GET /v1/mesh never enables. QNM-BUILD-1.0 live|locked|isolated. No Node Gate. Catalog MCP mesh_* + FragGate slug=mesh.
+Suite mesh: GET ${HOST}/v1/mesh PROXY to aziel-runtime. Default OFF. GET /v1/mesh never enables. QNM-BUILD-1.0 live|locked|isolated. QNS-CD-1.0 photon QNS1 packet transfer is a hub cite / Worker mesh cross-map only (no public qnsd proxy). No Node Gate. Catalog MCP mesh_* + FragGate slug=mesh.
 Designs: ${DESIGNS}
 SEC-FEAT-1.0: ${DESIGNS_SEC_FEAT}
 AZL-WP-1.1: ${DESIGNS_AZL_WP}
@@ -387,7 +387,7 @@ export function renderHome(stats, opts = {}) {
 
     <div id="meshStrip" aria-label="Suite Live Nodes">
       <div class="live"><b id="meshLiveCount">0</b> Live Nodes</div>
-      <div id="meshLine">Suite mesh: off (default). QNM-BUILD-1.0. Not an anonymity network.</div>
+      <div id="meshLine">Suite mesh: off (default). QNM-BUILD-1.0. QNS-CD-1.0. Not an anonymity network.</div>
       <div class="rollup">live <b id="qnmLive">0</b> · locked <b id="qnmLocked">0</b> · isolated <b id="qnmIsolated">0</b></div>
       <div>No Node Gate · No auto-heal · Aziel Eliab only</div>
       <div>
@@ -397,7 +397,7 @@ export function renderHome(stats, opts = {}) {
         <button id="meshJoin" type="button" title="Join as fraggate. Refused while mesh is OFF. No auto-join.">Join</button>
         <button id="meshLeave" type="button" title="Leave this node. No auto-heal.">Leave</button>
       </div>
-      <div id="meshProducts">Catalog MCP mesh_* · FragGate slug=mesh · /v1/mesh/* PROXY · not AnonBroadcast · not AZMail ring · not a Node Gate</div>
+      <div id="meshProducts">Catalog MCP mesh_* · FragGate slug=mesh · /v1/mesh/* PROXY · QNS-CD-1.0 photon QNS1 (hub cite / mesh cross-map; no qnsd proxy) · not AnonBroadcast · not AZMail ring · not a Node Gate</div>
     </div>
 
     <section class="workspace" id="workspace">
@@ -475,7 +475,7 @@ export function renderHome(stats, opts = {}) {
           <tr><td>Verify</td><td><code>POST /v1/fraggate/verify</code></td><td><code>matched</code> + digest + ledger tip when present</td></tr>
           <tr><td>OpenAPI</td><td><code>/openapi.json</code> and catalog OpenAPI</td><td>Same four paths documented</td></tr>
           <tr><td>MCP</td><td><code>POST /mcp</code> and catalog <code>POST /mcp</code></td><td>tools: fraggate_list, fraggate_describe, fraggate_verify, fraggate_call. Mesh pointer: catalog <code>mesh_*</code> + FragGate <code>slug=mesh</code></td></tr>
-          <tr><td>Live Nodes</td><td><code>GET /v1/mesh</code> PROXY</td><td>Default OFF. QNM live|locked|isolated. GET never enables. No Node Gate</td></tr>
+          <tr><td>Live Nodes</td><td><code>GET /v1/mesh</code> PROXY</td><td>Default OFF. QNM live|locked|isolated. QNS-CD-1.0 cross-map (photon QNS1; no qnsd proxy). GET never enables. No Node Gate</td></tr>
         </tbody>
       </table>
       <p class="meta">Default door = this Worker. Buttons call same-origin <code>/v1/fraggate/*</code>, which forwards to <code>${DEFAULT_DOOR}</code> (GET list / describe, POST verify / call). Suite mesh <code>/v1/mesh/*</code> PROXY (default OFF). Catalog door is the origin itself. Not AZBrowser. Not a Node Gate. Not UI-only.</p>
@@ -725,8 +725,8 @@ export function renderHome(stats, opts = {}) {
         $("qnmIsolated").textContent = String(isolated);
         var line = $("meshLine");
         if (on) line.textContent = "Suite mesh: on · live " + live + " · locked " + locked + " · isolated " + isolated + ". Not an anonymity network.";
-        else if (j.status === "unavailable" || (j.ok === false && j.error)) line.textContent = "Suite mesh: off (unavailable). QNM-BUILD-1.0. Not an anonymity network.";
-        else line.textContent = "Suite mesh: off (default). QNM-BUILD-1.0. Not an anonymity network.";
+        else if (j.status === "unavailable" || (j.ok === false && j.error)) line.textContent = "Suite mesh: off (unavailable). QNM-BUILD-1.0. QNS-CD-1.0. Not an anonymity network.";
+        else line.textContent = "Suite mesh: off (default). QNM-BUILD-1.0. QNS-CD-1.0. Not an anonymity network.";
         var products = j.products_present || j.products || [];
         var names = Array.isArray(products) ? products.map(function (p) { return typeof p === "string" ? p : (p && (p.product || p.slug)) || ""; }).filter(Boolean) : [];
         var nodes = Array.isArray(j.nodes) ? j.nodes : [];
