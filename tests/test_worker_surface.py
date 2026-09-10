@@ -107,6 +107,31 @@ def test_docs_dual_surface_and_clients() -> None:
     assert "Button test matrix" in readme
 
 
+def test_skill_and_llms_cite_design_docs() -> None:
+    runtime = _read("src/runtime.js")
+    home = _read("src/home.js")
+    skill = (ROOT / "SKILL.md").read_text(encoding="utf-8")
+    wp = (ROOT / "docs" / "FG-WP-0.1.md").read_text(encoding="utf-8")
+    spec = (ROOT / "docs" / "FragGate_v0_spec.md").read_text(encoding="utf-8")
+    blob = "https://github.com/AzielEliab/fraggate/blob/main/docs/designs"
+    tree = "https://github.com/AzielEliab/fraggate/tree/main/docs/designs"
+    for text in (runtime, home, skill):
+        assert f"{blob}/README.md" in text
+        assert f"{blob}/SEC-FEAT-1.0.md" in text
+        assert f"{blob}/AZL-WP-1.1.md" in text
+        assert f"{blob}/AZL-VOL-1.0.md" in text
+        assert "GET /v1/mesh never enables" in text
+        assert "Aziel Eliab only" in text
+    assert tree in home
+    assert "Designs:" in home
+    assert "docs/designs" in wp
+    assert "SEC-FEAT-1.0" in wp
+    assert "AZL-WP-1.1" in wp
+    assert "AZL-VOL-1.0" in wp
+    assert "docs/designs" in spec
+    assert "GET never enables" in home
+
+
 def test_kernel_version_unchanged() -> None:
     from fraggate.constants import MAGIC, VERSION
 

@@ -94,3 +94,8 @@ def test_docs_advertise_mesh_proxy() -> None:
     assert "AZIEL_RUNTIME" in WORKER_README
     assert "Live Nodes" in WORKER_README
     assert "Aziel Eliab" in MESH
+    assert "GET never enables" in DOOR
+    assert "GET /v1/mesh never enables" in RUNTIME
+    assert "GET /v1/mesh never enables" in HOME
+    assert "Aziel Eliab only" in RUNTIME
+    assert "Aziel Eliab only" in HOME

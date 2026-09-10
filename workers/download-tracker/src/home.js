@@ -12,6 +12,11 @@ const CATALOG = DEFAULT_DOOR + "/";
 const CATALOG_MCP = DEFAULT_DOOR + "/mcp";
 const CATALOG_OPENAPI = DEFAULT_DOOR + "/openapi.json";
 const LICENSE = "https://www.apache.org/licenses/LICENSE-2.0";
+const DESIGNS = "https://github.com/AzielEliab/fraggate/tree/main/docs/designs";
+const DESIGNS_README = "https://github.com/AzielEliab/fraggate/blob/main/docs/designs/README.md";
+const DESIGNS_SEC_FEAT = "https://github.com/AzielEliab/fraggate/blob/main/docs/designs/SEC-FEAT-1.0.md";
+const DESIGNS_AZL_WP = "https://github.com/AzielEliab/fraggate/blob/main/docs/designs/AZL-WP-1.1.md";
+const DESIGNS_AZL_VOL = "https://github.com/AzielEliab/fraggate/blob/main/docs/designs/AZL-VOL-1.0.md";
 const TITLE = "FragGate — Aziel Eliab";
 const DEFAULT_ASSET = "fraggate-0.1.0.tar.gz";
 const INSTALL_LINE = "curl -fsSL https://fraggate-download-tracker.vibelock.workers.dev/install.sh | bash";
@@ -182,7 +187,12 @@ MCP: POST ${HOST}/mcp
 Skill: ${HOST}/v1/skill
 Cite: ${HOST}/cite.json
 Ops (human buttons = OpenAPI = MCP): GET /v1/fraggate/list, GET /v1/fraggate/describe, POST /v1/fraggate/verify, POST /v1/fraggate/call
-Suite mesh: GET ${HOST}/v1/mesh PROXY to aziel-runtime. Default OFF. QNM-BUILD-1.0 live|locked|isolated. No Node Gate. Catalog MCP mesh_* + FragGate slug=mesh.
+Suite mesh: GET ${HOST}/v1/mesh PROXY to aziel-runtime. Default OFF. GET /v1/mesh never enables. QNM-BUILD-1.0 live|locked|isolated. No Node Gate. Catalog MCP mesh_* + FragGate slug=mesh.
+Designs: ${DESIGNS}
+SEC-FEAT-1.0: ${DESIGNS_SEC_FEAT}
+AZL-WP-1.1: ${DESIGNS_AZL_WP}
+AZL-VOL-1.0: ${DESIGNS_AZL_VOL}
+Index: ${DESIGNS_README}
 Canonical agent path: POST ${CATALOG_MCP} and ${DEFAULT_DOOR}/v1/fraggate/*
 Identity: Aziel Eliab only
 License: Apache-2.0
@@ -360,6 +370,7 @@ export function renderHome(stats, opts = {}) {
         <p class="pill" id="api-pill">API · checking</p>
       </div>
       <p class="lede">v${VERSION} software by <strong>${AUTHOR}</strong> only. Human buttons and MCP/OpenAPI share List / Describe / Call / Verify. The Python kernel stays FG-0.1. Forks are welcome and always allowed.</p>
+      <p class="meta">Designs: <a href="${DESIGNS}">docs/designs</a> (SEC-FEAT-1.0, AZL-WP-1.1, AZL-VOL-1.0)</p>
       <nav class="toc" aria-label="Product sections">
         <a href="#workspace">Use UI</a>
         <a href="#meshStrip">Live Nodes</a>

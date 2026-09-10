@@ -11,6 +11,7 @@
 - Homepage (runtime door): https://aziel-runtime.vibelock.workers.dev/
 - Human Worker UI: https://fraggate-download-tracker.vibelock.workers.dev/
 - Repository: https://github.com/AzielEliab/fraggate
+- Suite designs: [docs/designs/](designs/README.md) — [SEC-FEAT-1.0](designs/SEC-FEAT-1.0.md), [AZL-WP-1.1](designs/AZL-WP-1.1.md), [AZL-VOL-1.0](designs/AZL-VOL-1.0.md)
 
 Historical note: an earlier draft of this paper used the dual credit line “Aziel / GodLock.AZ”. Public credit is **Aziel Eliab** only. GodLock is a product name in the Aziel Eliab catalog, not an author and not this kernel.
 
@@ -125,7 +126,11 @@ aziel-runtime remains the public mesh: catalog, pull, session, in-process engine
 - Not a rewrite of the Locks.
 - Not legal advice, not a court, not a truth score.
 
-## 12. Cite
+## 12. Suite designs
+
+Related suite papers (not this kernel paper) live in [docs/designs/](designs/README.md): [SEC-FEAT-1.0](designs/SEC-FEAT-1.0.md), [AZL-WP-1.1](designs/AZL-WP-1.1.md), [AZL-VOL-1.0](designs/AZL-VOL-1.0.md). Author: Aziel Eliab only. GET /v1/mesh never enables.
+
+## 13. Cite
 
 Eliab, Aziel. (2026). FragGate FG-0.1 (FG-WP-0.1) [Software]. Apache-2.0. https://github.com/AzielEliab/fraggate
 

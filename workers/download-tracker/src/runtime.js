@@ -72,9 +72,21 @@ This Worker **doubles** those four ops (proxy, not a second kernel):
 - OpenAPI: \`${HOST}/openapi.json\`
 - MCP: \`POST ${HOST}/mcp\`
 - Same routes: \`${HOST}/v1/fraggate/list|describe|verify|call\`
-- Suite mesh PROXY: \`${HOST}/v1/mesh/*\` (AZIEL_RUNTIME). Default OFF. QNM-BUILD-1.0 live|locked|isolated. No Node Gate. Catalog MCP \`mesh_*\` + FragGate \`slug=mesh\`.
+- Suite mesh PROXY: \`${HOST}/v1/mesh/*\` (AZIEL_RUNTIME). Default OFF. GET /v1/mesh never enables. QNM-BUILD-1.0 live|locked|isolated. No Node Gate. Catalog MCP \`mesh_*\` + FragGate \`slug=mesh\`.
+- Suite designs: \`https://github.com/AzielEliab/fraggate/blob/main/docs/designs/README.md\` — SEC-FEAT-1.0, AZL-WP-1.1, AZL-VOL-1.0.
 
 Always send \`User-Agent: Mozilla/5.0\`. Cloudflare Workers may 403 an empty agent.
+
+## Suite designs
+
+Papers in \`docs/designs/\` (author Aziel Eliab only). Cite the GitHub files; do not invent missing papers.
+
+- Index: https://github.com/AzielEliab/fraggate/blob/main/docs/designs/README.md
+- SEC-FEAT-1.0: https://github.com/AzielEliab/fraggate/blob/main/docs/designs/SEC-FEAT-1.0.md
+- AZL-WP-1.1: https://github.com/AzielEliab/fraggate/blob/main/docs/designs/AZL-WP-1.1.md
+- AZL-VOL-1.0: https://github.com/AzielEliab/fraggate/blob/main/docs/designs/AZL-VOL-1.0.md
+
+GET /v1/mesh never enables. Identity Aziel Eliab only.
 
 ## Compatible AI clients
 
