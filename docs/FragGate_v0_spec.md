@@ -1,6 +1,6 @@
 # FragGate v0 field spec (FG-0.1)
 
-Normative types for the FG-0.1 kernel. Paper: [FG-WP-0.1](FG-WP-0.1.md). Magic `FGT1`. Version `0.1.0`. Author: Aziel Eliab.
+Normative types for the FG-0.1 kernel. Paper: [FG-WP-0.1](FG-WP-0.1.md). Magic `FGT1`. Version `0.1.0`. Author: Aziel Eliab. Suite designs (not kernel types): [docs/designs/](designs/README.md) — [SEC-FEAT-1.0](designs/SEC-FEAT-1.0.md), [AZL-WP-1.1](designs/AZL-WP-1.1.md), [AZL-VOL-1.0](designs/AZL-VOL-1.0.md).
 
 Canonical encoding: UTF-8 JSON, `sort_keys=True`, `separators=(",", ":")`, `ensure_ascii=False`. Hashes are SHA-256 lowercase hex of those bytes.
 
