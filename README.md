@@ -2,7 +2,9 @@
 
 **FG-0.1 kernel against tool fragmentation and model hallucination.**
 
-Author: **Aziel Eliab**
+**FragGate is THE single door (FG-0.1).** Host: [Aziel Runtime](https://github.com/AzielEliab/aziel-runtime) **2.0.0-rc1**.
+
+Author: **Aziel Eliab** only. Aka / `alternateName` only: **Aziel Elroi Eliab** (Elroi).
 License: [Apache-2.0](LICENSE)
 Version: 0.1.0
 Magic: `FGT1`
@@ -12,6 +14,21 @@ Kernel homepage (runtime door): https://aziel-runtime.vibelock.workers.dev/
 Human Worker UI: https://fraggate-download-tracker.vibelock.workers.dev/
 
 Forks are welcome and always allowed.
+
+## Official Aziel ecosystem
+
+| Surface | URL |
+|---------|-----|
+| Official site (Person `@id`) | https://www.azieleliab.com/ — [`#aziel`](https://www.azieleliab.com/#aziel) |
+| Runtime hub (`@id` `#runtime`) | https://www.azieleliab.com/runtime#runtime |
+| Aziel Corpus Library | https://www.azielcorpuslibrary.net/ |
+| GodLock.uk | https://godlock.uk/ |
+| Aziel Runtime (host, **2.0.0-rc1**) | https://github.com/AzielEliab/aziel-runtime |
+| **Try on Glama** (primary MCP) | https://glama.ai/mcp/servers/AzielEliab/aziel-runtime |
+| Runtime Worker (secondary) | https://aziel-runtime.vibelock.workers.dev/ |
+| Human Worker UI (this repo) | https://fraggate-download-tracker.vibelock.workers.dev/ |
+
+**[Try on Glama](https://glama.ai/mcp/servers/AzielEliab/aziel-runtime)** is the primary Install Server / MCP distribution door. The Worker origin stays the execution / OpenAPI surface (secondary). GitHub About lock: [docs/github-seo.md](docs/github-seo.md).
 
 ## Dual surface
 
@@ -62,14 +79,15 @@ v0.1 door tools: `runtime.ping`, `registry.list`, `registry.verify`, `claim.chec
 - Not a rewrite of the Locks.
 - Not a DOI mint.
 
-Public identity is **Aziel Eliab** only. GodLock is a product name, not an author.
+Public identity is **Aziel Eliab** only (Elroi aka OK). GodLock is a product name, not an author.
 
 ## Relation to aziel-runtime
 
-**FragGate is the door. aziel-runtime hosts the public mesh.**
+**FragGate is THE single door (FG-0.1). Aziel Runtime 2.0.0-rc1 hosts the public mesh.**
 
 - This repo is the local kernel: envelopes, hashed registry, DecisionGATE stub, claim rules, JSONL ledger.
-- [aziel-runtime](https://github.com/AzielEliab/aziel-runtime) (`https://aziel-runtime.vibelock.workers.dev/`) is the catalog + session + in-process engines.
+- [aziel-runtime](https://github.com/AzielEliab/aziel-runtime) **2.0.0-rc1** (`https://aziel-runtime.vibelock.workers.dev/`) is the catalog + session + in-process engines.
+- Primary MCP install: **[Try on Glama](https://glama.ai/mcp/servers/AzielEliab/aziel-runtime)**. Worker origin is secondary.
 - A Lock should not remain a private runtime. It binds here. The runtime remains the public host.
 
 ## Install
@@ -152,5 +170,9 @@ Offline. No network.
 
 Eliab, Aziel. (2026). FragGate FG-0.1 [Software]. Apache-2.0. https://github.com/AzielEliab/fraggate
 
-Runtime door: https://aziel-runtime.vibelock.workers.dev/
+Host: Aziel Runtime 2.0.0-rc1 — https://github.com/AzielEliab/aziel-runtime
+Person `@id`: https://www.azieleliab.com/#aziel
+Runtime `@id`: https://www.azieleliab.com/runtime#runtime
+Try on Glama (primary MCP): https://glama.ai/mcp/servers/AzielEliab/aziel-runtime
+Runtime door (secondary): https://aziel-runtime.vibelock.workers.dev/
 Human Worker: https://fraggate-download-tracker.vibelock.workers.dev/
