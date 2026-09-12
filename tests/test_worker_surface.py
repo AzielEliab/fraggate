@@ -31,6 +31,28 @@ def test_worker_files_exist() -> None:
         assert (WORKER / rel).is_file(), rel
 
 
+def test_official_rose_star_brandmark() -> None:
+    """Served /sigil.png is the official rose-star; public mark has empty alt."""
+    import struct
+
+    data = (WORKER / "public" / "sigil.png").read_bytes()
+    assert len(data) == 75035, len(data)
+    assert data[:8] == b"\x89PNG\r\n\x1a\n"
+    assert data[12:16] == b"IHDR"
+    width, height = struct.unpack(">II", data[16:24])
+    assert (width, height) == (196, 139)
+    home = _read("src/home.js")
+    runtime = _read("src/runtime.js")
+    assert 'class="brandmark" src="/sigil.png" width="40" height="40" alt=""' in home
+    assert '<p class="stamp">Aziel Eliab</p>' in home
+    assert 'title="Everblooming' not in home
+    assert 'alt="Everblooming' not in home
+    assert "Everblooming sigil" not in home
+    assert 'src="/sigil.png" alt=""' in runtime
+    assert 'alt="Everblooming' not in runtime
+    assert "Everblooming sigil" not in runtime
+
+
 def test_worker_name_and_url() -> None:
     toml = _read("wrangler.toml")
     assert 'name = "fraggate-download-tracker"' in toml

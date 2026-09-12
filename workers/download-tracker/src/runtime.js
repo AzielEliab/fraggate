@@ -307,7 +307,7 @@ function aiHtml(origin, env) {
   return `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>FragGate — AI runtime</title>
 <style>:root{color-scheme:dark}body{font:16px/1.45 system-ui,sans-serif;max-width:46rem;margin:3rem auto;padding:0 1.25rem;background:#0b0b0b;color:#e8e0d0}a{color:#c9a227}.banner{border:1px solid #5c4a1a;background:#241c0d;color:#f0d78c;padding:.85rem 1rem;border-radius:8px}pre{background:#141414;padding:.85rem 1rem;overflow:auto;border-radius:8px}</style></head>
 <body>
-<img src="${SIGIL}" alt="Everblooming sigil — Aziel Eliab" width="48" height="48">
+<img src="/sigil.png" alt="" width="48" height="48">
 <h1>FragGate runtime</h1>
 <p class="banner">Dual surface. Human UI is the Worker homepage. Agent path is MCP/OpenAPI over the same List / Describe / Call / Verify ops. Not a second kernel. Author Aziel Eliab.</p>
 <p>Canonical agent door: <code>POST ${door}/mcp</code> and <code>${door}/v1/fraggate/*</code></p>
