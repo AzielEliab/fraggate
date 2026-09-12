@@ -1,0 +1,37 @@
+cff-version: 1.2.0
+title: FragGate
+message: If you use this software, please cite it as below.
+type: software
+authors:
+  - family-names: Eliab
+    given-names: Aziel
+    alias: Aziel Elroi Eliab
+    website: https://www.azieleliab.com/#aziel
+license: Apache-2.0
+version: 0.1.0
+date-released: "2026-09-05"
+abstract: >-
+  FragGate FG-0.1 is THE single door for Aziel Runtime 2.0.0-rc1
+  (MCP / OpenAPI). Hashed registry, DecisionGATE, ledger.
+  Public identity Aziel Eliab only.
+repository-code: https://github.com/AzielEliab/fraggate
+url: https://aziel-runtime.vibelock.workers.dev/
+keywords:
+  - fraggate
+  - aziel-runtime
+  - mcp
+  - openapi
+  - decisiongate
+  - digital-forensics
+  - kernel
+preferred-citation:
+  type: software
+  title: "FragGate FG-0.1"
+  authors:
+    - family-names: Eliab
+      given-names: Aziel
+  year: 2026
+  url: https://github.com/AzielEliab/fraggate
+  notes: >-
+    Hosted on Aziel Runtime 2.0.0-rc1.
+    Primary MCP: https://glama.ai/mcp/servers/AzielEliab/aziel-runtime
