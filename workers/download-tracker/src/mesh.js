@@ -7,6 +7,15 @@
  * No Node Gate. No auto-heal. Not an anonymity network.
  * No public qnsd proxy. Not a Softwares-tab product.
  * /v1/mesh/* PROXY to aziel-runtime (AZIEL_RUNTIME binding).
+ * FragGate remains the single door — do not invent a second mesh door.
+ *
+ * SPLIT THE WIRES (locked): tip-only 0.5–1s tick; pull-only payload;
+ * update=proof not timer; 777s dwell after valid cite; equivocation ends
+ * peer; emit last locally; Phoenix local only; partition no auto-splice;
+ * heartbeat loss≠poison; 1s≠777s sockets.
+ * COLD-COPY SURVIVAL (locked): multiply cold copies; refuse live body
+ * sync; tip expensive to erase; server pull cannot wipe cold replicas;
+ * data outlives creators.
  * Author: Aziel Eliab only.
  */
 
@@ -63,8 +72,59 @@ export const QNS_CD = Object.freeze({
     "QNS-CD-1.0 photon QNS1 packet transfer. Local qnsd is coded in qnm-node. Runtime cites + catalog field live in aziel-runtime. AZInterface holds pair custody. Hub cite / Worker mesh cross-map only. Not a Softwares-tab product. No public qnsd proxy. No Node Gate. Mesh stays default OFF. Author: Aziel Eliab only.",
 });
 
+export const SPLIT_THE_WIRES = "SPLIT THE WIRES";
+export const COLD_COPY_SURVIVAL = "COLD-COPY SURVIVAL";
+export const MESH_STW_REFUSED = "MESH-STW-REFUSED";
+export const MESH_CCS_REFUSED = "MESH-CCS-REFUSED";
+export const MESH_LAW_REFUSED = "MESH-LAW-REFUSED";
+export const MESH_SINGLE_DOOR = "fraggate";
+export const MESH_SECOND_DOOR = false;
+
+/** Locked SPLIT THE WIRES clauses. Rollup/status refuse cites these verbatim. */
+export const SPLIT_THE_WIRES_LAW = Object.freeze({
+  name: SPLIT_THE_WIRES,
+  author: IDENTITY,
+  identity: IDENTITY,
+  door: MESH_SINGLE_DOOR,
+  second_mesh_door: MESH_SECOND_DOOR,
+  tip_only: "tip-only 0.5–1s tick",
+  payload: "pull-only payload",
+  update: "update=proof not timer",
+  dwell: "777s dwell after valid cite",
+  equivocation: "equivocation ends peer",
+  emit_last: "emit last locally",
+  phoenix: "Phoenix local only",
+  partition: "partition no auto-splice",
+  heartbeat_loss: "heartbeat loss≠poison",
+  sockets: "1s≠777s sockets",
+});
+
+/** Locked COLD-COPY SURVIVAL clauses. Rollup/status refuse cites these verbatim. */
+export const COLD_COPY_SURVIVAL_LAW = Object.freeze({
+  name: COLD_COPY_SURVIVAL,
+  author: IDENTITY,
+  identity: IDENTITY,
+  door: MESH_SINGLE_DOOR,
+  second_mesh_door: MESH_SECOND_DOOR,
+  multiply: "multiply cold copies",
+  live_body_sync: false,
+  live_body_sync_refuse: "refuse live body sync",
+  tip: "tip expensive to erase",
+  server_pull_wipe: false,
+  server_pull: "server pull cannot wipe cold replicas",
+  outlives: "data outlives creators",
+});
+
+export const SPLIT_THE_WIRES_REFUSE =
+  "SPLIT THE WIRES refuse. Tip-only 0.5–1s tick. Pull-only payload. Update=proof not timer. 777s dwell after valid cite. Equivocation ends peer. Emit last locally. Phoenix local only. Partition no auto-splice. Heartbeat loss≠poison. 1s≠777s sockets. FragGate remains the single door — not a second mesh door. Author: Aziel Eliab only.";
+
+export const COLD_COPY_SURVIVAL_REFUSE =
+  "COLD-COPY SURVIVAL refuse. Multiply cold copies. Refuse live body sync. Tip expensive to erase. Server pull cannot wipe cold replicas. Data outlives creators. FragGate remains the single door — not a second mesh door. Author: Aziel Eliab only.";
+
+export const MESH_LAW_REFUSE = SPLIT_THE_WIRES_REFUSE + " " + COLD_COPY_SURVIVAL_REFUSE;
+
 export const MESH_NOTE =
-  "QNM-BUILD-1.0. QNS-CD-1.0 photon QNS1 packet transfer. Suite mesh default off. Live|locked|isolated counts only. No Node Gate. No auto-heal. Not an anonymity network. No public qnsd proxy. Not a Softwares-tab product. Author: Aziel Eliab only.";
+  "QNM-BUILD-1.0. QNS-CD-1.0 photon QNS1 packet transfer. Suite mesh default off. Live|locked|isolated counts only. No Node Gate. No auto-heal. Not an anonymity network. No public qnsd proxy. Not a Softwares-tab product. SPLIT THE WIRES. COLD-COPY SURVIVAL. FragGate remains the single door. Author: Aziel Eliab only.";
 
 export const MESH_OPS = Object.freeze([
   "status",
@@ -149,6 +209,47 @@ function parseRollup(inner, listedLive) {
   };
 }
 
+/** Stamp locked mesh-law refuse text onto rollup / status envelopes. */
+export function attachMeshLaw(doc) {
+  const law = {
+    split_the_wires: SPLIT_THE_WIRES_LAW,
+    cold_copy_survival: COLD_COPY_SURVIVAL_LAW,
+    split_the_wires_refuse: SPLIT_THE_WIRES_REFUSE,
+    cold_copy_survival_refuse: COLD_COPY_SURVIVAL_REFUSE,
+    mesh_law_refuse: MESH_LAW_REFUSE,
+    fraggate_single_door: true,
+    second_mesh_door: false,
+    author: IDENTITY,
+    identity: IDENTITY,
+  };
+  if (!doc || typeof doc !== "object" || Array.isArray(doc)) return law;
+  return { ...doc, ...law };
+}
+
+/** Rollup/status refuse envelope for a locked-law violation. Not a second door. */
+export function meshLawRefuse(kind = "law") {
+  const k = String(kind || "law").trim().toLowerCase().replace(/[\s-]+/g, "_");
+  const split = k === "split" || k === "stw" || k === "split_the_wires";
+  const cold = k === "cold" || k === "ccs" || k === "cold_copy" || k === "cold_copy_survival";
+  return attachMeshCite({
+    ok: false,
+    code: split ? MESH_STW_REFUSED : cold ? MESH_CCS_REFUSED : MESH_LAW_REFUSED,
+    door: MESH_SINGLE_DOOR,
+    kernel: MESH_KERNEL,
+    spec: QNM_SPEC,
+    status: "refuse",
+    message: split ? SPLIT_THE_WIRES_REFUSE : cold ? COLD_COPY_SURVIVAL_REFUSE : MESH_LAW_REFUSE,
+    rollup: emptyRollup(),
+    node_gate: false,
+    auto_heal: false,
+    anonymity_network: false,
+    second_mesh_door: false,
+    fraggate_single_door: true,
+    author: IDENTITY,
+    identity: IDENTITY,
+  });
+}
+
 /** Stamp the QNS-CD-1.0 cross-map so peers can see it on Live Nodes / status. */
 export function attachQnsCd(doc) {
   if (!doc || typeof doc !== "object" || Array.isArray(doc)) {
@@ -159,10 +260,15 @@ export function attachQnsCd(doc) {
   return { ...doc, qns_cd, qns_cd_spec: QNS_CD_SPEC };
 }
 
+/** QNS-CD cite plus locked SPLIT THE WIRES / COLD-COPY SURVIVAL refuse text. */
+export function attachMeshCite(doc) {
+  return attachMeshLaw(attachQnsCd(doc));
+}
+
 export function emptyMesh(extra = {}) {
   const rollup =
     extra.rollup && typeof extra.rollup === "object" ? { ...emptyRollup(), ...extra.rollup } : emptyRollup();
-  return attachQnsCd({
+  return attachMeshCite({
     ok: true,
     spec: QNM_SPEC,
     kernel: MESH_KERNEL,
@@ -248,7 +354,7 @@ export function parseMeshDoc(body) {
     source: inner.source || "parsed",
     door: inner.door || MESH_PATH,
     note: enabled
-      ? "QNM-BUILD-1.0. QNS-CD-1.0 photon QNS1 packet transfer. Suite mesh is on. Live|locked|isolated counts only. No Node Gate. No auto-heal. Not an anonymity network. No public qnsd proxy."
+      ? "QNM-BUILD-1.0. QNS-CD-1.0 photon QNS1 packet transfer. Suite mesh is on. Live|locked|isolated counts only. No Node Gate. No auto-heal. Not an anonymity network. No public qnsd proxy. SPLIT THE WIRES. COLD-COPY SURVIVAL. FragGate remains the single door."
       : MESH_NOTE,
   });
 }
@@ -257,7 +363,7 @@ export function publicMesh(mesh) {
   const m = mesh && typeof mesh === "object" ? mesh : emptyMesh();
   const enabled = !!m.enabled;
   const rollup = enabled ? meshRollup(m) : emptyRollup();
-  return attachQnsCd({
+  return attachMeshCite({
     spec: QNM_SPEC,
     qns_cd: QNS_CD,
     qns_cd_spec: QNS_CD_SPEC,
@@ -296,12 +402,12 @@ export function meshStatusLine(mesh) {
   const m = mesh && typeof mesh === "object" ? mesh : emptyMesh();
   if (m.enabled) {
     const r = meshRollup(m);
-    return "Suite mesh: on · live " + r.live + " · locked " + r.locked + " · isolated " + r.isolated + ". Not an anonymity network.";
+    return "Suite mesh: on · live " + r.live + " · locked " + r.locked + " · isolated " + r.isolated + ". SPLIT THE WIRES. COLD-COPY SURVIVAL. FragGate remains the single door. Not an anonymity network.";
   }
   if (m.status === "unavailable") {
-    return "Suite mesh: off (unavailable). QNM-BUILD-1.0. QNS-CD-1.0. Not an anonymity network.";
+    return "Suite mesh: off (unavailable). QNM-BUILD-1.0. QNS-CD-1.0. SPLIT THE WIRES. COLD-COPY SURVIVAL. FragGate remains the single door. Not an anonymity network.";
   }
-  return "Suite mesh: off (default). QNM-BUILD-1.0. QNS-CD-1.0. Not an anonymity network.";
+  return "Suite mesh: off (default). QNM-BUILD-1.0. QNS-CD-1.0. SPLIT THE WIRES. COLD-COPY SURVIVAL. FragGate remains the single door. Not an anonymity network.";
 }
 
 /** Public Live Nodes count. Never auto-heal a visiting floor. */
@@ -311,7 +417,7 @@ export function alignLiveNodes({ mesh } = {}) {
 }
 
 export function meshPointer() {
-  return attachQnsCd({
+  return attachMeshCite({
     pointer: true,
     path: MESH_PATH,
     enabled_default: false,
@@ -329,7 +435,7 @@ export function meshPointer() {
     fraggate_slug: MESH_SLUG,
     origin: RUNTIME + MESH_PATH,
     note:
-      "PROXY to aziel-runtime /v1/mesh/* via AZIEL_RUNTIME. Not a local op. Not AnonBroadcast. Not AZMail's product-local ring. FragGate remains the FG-0.1 door. Full node process is local qnm-node/. QNS-CD-1.0 photon QNS1 packet transfer is a hub cite / Worker mesh cross-map only — not a public qnsd proxy. " +
+      "PROXY to aziel-runtime /v1/mesh/* via AZIEL_RUNTIME. Not a local op. Not AnonBroadcast. Not AZMail's product-local ring. FragGate remains the single door — not a second mesh door. Full node process is local qnm-node/. QNS-CD-1.0 photon QNS1 packet transfer is a hub cite / Worker mesh cross-map only — not a public qnsd proxy. SPLIT THE WIRES. COLD-COPY SURVIVAL. " +
       MESH_NOTE,
     anon_broadcast: ANON_BROADCAST,
     anon_broadcast_publish_path: false,
