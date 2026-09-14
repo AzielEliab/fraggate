@@ -11,7 +11,13 @@
  * Author: Aziel Eliab only. Apache-2.0.
  */
 
-import { attachMeshCite, attachQnsCd, QNS_CD, QNS_CD_SPEC } from "./mesh.js";
+import {
+  attachMeshCite,
+  isNeighborRehealPath,
+  meshLawRefuse,
+  QNS_CD,
+  QNS_CD_SPEC,
+} from "./mesh.js";
 
 export const DEFAULT_DOOR = "https://aziel-runtime.vibelock.workers.dev";
 export const KERNEL = "https://github.com/AzielEliab/fraggate";
@@ -223,6 +229,7 @@ function meshErrFields({ message, door_url, http_status, content_type, via, extr
     identity: AUTHOR,
     node_gate: false,
     auto_heal: false,
+    neighbor_reheal: false,
     anonymity_network: false,
     second_mesh_door: false,
     fraggate_single_door: true,
@@ -241,6 +248,9 @@ function meshErrFields({ message, door_url, http_status, content_type, via, extr
  */
 export async function runMeshProxy(env, request, pathAndQuery) {
   const pathOnly = normalizeMeshPath(pathAndQuery);
+  if (isNeighborRehealPath(pathOnly)) {
+    return { status: 403, data: meshLawRefuse("reheal") };
+  }
   const allowed = MESH_ROUTE_METHODS[pathOnly];
   if (!allowed) {
     return {

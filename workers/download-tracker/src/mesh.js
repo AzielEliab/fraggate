@@ -16,6 +16,13 @@
  * COLD-COPY SURVIVAL (locked): multiply cold copies; refuse live body
  * sync; tip expensive to erase; server pull cannot wipe cold replicas;
  * data outlives creators.
+ * REHEAL (locked): poisoned node heals from own last good tip +
+ * verified pull of bytes already trusted OR phoenix-WAITs — not by
+ * listening to neighbors. Allowed chatter: live/locked/isolated/tip-hash.
+ * Forbidden: bodies, diffs, vote-to-fix, "here's what you should be."
+ * Isolate, drop tether, local phoenix; other nodes keep chain.
+ * Isolation is cure; neighbor reheal = majority fanfic / group hug
+ * over a wound.
  * Author: Aziel Eliab only.
  */
 
@@ -74,8 +81,10 @@ export const QNS_CD = Object.freeze({
 
 export const SPLIT_THE_WIRES = "SPLIT THE WIRES";
 export const COLD_COPY_SURVIVAL = "COLD-COPY SURVIVAL";
+export const REHEAL = "REHEAL";
 export const MESH_STW_REFUSED = "MESH-STW-REFUSED";
 export const MESH_CCS_REFUSED = "MESH-CCS-REFUSED";
+export const MESH_REHEAL_REFUSED = "MESH-REHEAL-REFUSED";
 export const MESH_LAW_REFUSED = "MESH-LAW-REFUSED";
 export const MESH_SINGLE_DOOR = "fraggate";
 export const MESH_SECOND_DOOR = false;
@@ -115,16 +124,42 @@ export const COLD_COPY_SURVIVAL_LAW = Object.freeze({
   outlives: "data outlives creators",
 });
 
+/** Locked REHEAL clauses. Rollup/status refuse cites these verbatim. */
+export const REHEAL_LAW = Object.freeze({
+  name: REHEAL,
+  author: IDENTITY,
+  identity: IDENTITY,
+  door: MESH_SINGLE_DOOR,
+  second_mesh_door: MESH_SECOND_DOOR,
+  heal: "heal from own last good tip",
+  pull: "verified pull of bytes already trusted",
+  phoenix_wait: "phoenix-WAITs",
+  neighbor_listen: false,
+  neighbor_reheal: false,
+  allowed_chatter: "live/locked/isolated/tip-hash",
+  forbidden_bodies: false,
+  forbidden_diffs: false,
+  forbidden_vote_to_fix: false,
+  forbidden: "bodies, diffs, vote-to-fix, here's what you should be",
+  isolate: "isolate, drop tether, local phoenix",
+  peers: "other nodes keep chain",
+  isolation: "isolation is cure",
+  neighbor_reheal_refuse: "majority fanfic / group hug over a wound",
+});
+
 export const SPLIT_THE_WIRES_REFUSE =
   "SPLIT THE WIRES refuse. Tip-only 0.5–1s tick. Pull-only payload. Update=proof not timer. 777s dwell after valid cite. Equivocation ends peer. Emit last locally. Phoenix local only. Partition no auto-splice. Heartbeat loss≠poison. 1s≠777s sockets. FragGate remains the single door — not a second mesh door. Author: Aziel Eliab only.";
 
 export const COLD_COPY_SURVIVAL_REFUSE =
   "COLD-COPY SURVIVAL refuse. Multiply cold copies. Refuse live body sync. Tip expensive to erase. Server pull cannot wipe cold replicas. Data outlives creators. FragGate remains the single door — not a second mesh door. Author: Aziel Eliab only.";
 
-export const MESH_LAW_REFUSE = SPLIT_THE_WIRES_REFUSE + " " + COLD_COPY_SURVIVAL_REFUSE;
+export const REHEAL_REFUSE =
+  "REHEAL refuse. Poisoned node heals from own last good tip + verified pull of bytes already trusted OR phoenix-WAITs — not by listening to neighbors. Allowed chatter: live/locked/isolated/tip-hash. Forbidden: bodies, diffs, vote-to-fix, \"here's what you should be.\" Isolate, drop tether, local phoenix; other nodes keep chain. Isolation is cure; neighbor reheal = majority fanfic / group hug over a wound. FragGate remains the single door — not a second mesh door. Author: Aziel Eliab only.";
+
+export const MESH_LAW_REFUSE = SPLIT_THE_WIRES_REFUSE + " " + COLD_COPY_SURVIVAL_REFUSE + " " + REHEAL_REFUSE;
 
 export const MESH_NOTE =
-  "QNM-BUILD-1.0. QNS-CD-1.0 photon QNS1 packet transfer. Suite mesh default off. Live|locked|isolated counts only. No Node Gate. No auto-heal. Not an anonymity network. No public qnsd proxy. Not a Softwares-tab product. SPLIT THE WIRES. COLD-COPY SURVIVAL. FragGate remains the single door. Author: Aziel Eliab only.";
+  "QNM-BUILD-1.0. QNS-CD-1.0 photon QNS1 packet transfer. Suite mesh default off. Live|locked|isolated counts only. No Node Gate. No auto-heal. Not an anonymity network. No public qnsd proxy. Not a Softwares-tab product. SPLIT THE WIRES. COLD-COPY SURVIVAL. REHEAL. FragGate remains the single door. Author: Aziel Eliab only.";
 
 export const MESH_OPS = Object.freeze([
   "status",
@@ -214,9 +249,12 @@ export function attachMeshLaw(doc) {
   const law = {
     split_the_wires: SPLIT_THE_WIRES_LAW,
     cold_copy_survival: COLD_COPY_SURVIVAL_LAW,
+    reheal: REHEAL_LAW,
     split_the_wires_refuse: SPLIT_THE_WIRES_REFUSE,
     cold_copy_survival_refuse: COLD_COPY_SURVIVAL_REFUSE,
+    reheal_refuse: REHEAL_REFUSE,
     mesh_law_refuse: MESH_LAW_REFUSE,
+    neighbor_reheal: false,
     fraggate_single_door: true,
     second_mesh_door: false,
     author: IDENTITY,
@@ -231,23 +269,61 @@ export function meshLawRefuse(kind = "law") {
   const k = String(kind || "law").trim().toLowerCase().replace(/[\s-]+/g, "_");
   const split = k === "split" || k === "stw" || k === "split_the_wires";
   const cold = k === "cold" || k === "ccs" || k === "cold_copy" || k === "cold_copy_survival";
+  const reheal =
+    k === "reheal" || k === "rh" || k === "heal" || k === "neighbor_reheal" || k === "neighbor";
+  const code = split
+    ? MESH_STW_REFUSED
+    : cold
+      ? MESH_CCS_REFUSED
+      : reheal
+        ? MESH_REHEAL_REFUSED
+        : MESH_LAW_REFUSED;
+  const message = split
+    ? SPLIT_THE_WIRES_REFUSE
+    : cold
+      ? COLD_COPY_SURVIVAL_REFUSE
+      : reheal
+        ? REHEAL_REFUSE
+        : MESH_LAW_REFUSE;
   return attachMeshCite({
     ok: false,
-    code: split ? MESH_STW_REFUSED : cold ? MESH_CCS_REFUSED : MESH_LAW_REFUSED,
+    code,
     door: MESH_SINGLE_DOOR,
     kernel: MESH_KERNEL,
     spec: QNM_SPEC,
     status: "refuse",
-    message: split ? SPLIT_THE_WIRES_REFUSE : cold ? COLD_COPY_SURVIVAL_REFUSE : MESH_LAW_REFUSE,
+    message,
     rollup: emptyRollup(),
     node_gate: false,
     auto_heal: false,
+    neighbor_reheal: false,
     anonymity_network: false,
     second_mesh_door: false,
     fraggate_single_door: true,
     author: IDENTITY,
     identity: IDENTITY,
   });
+}
+
+/** Neighbor reheal / vote-to-fix / heal paths. Not advertised ops. Isolation is cure. */
+export const NEIGHBOR_REHEAL_PATHS = Object.freeze([
+  "/v1/mesh/reheal",
+  "/v1/mesh/heal",
+  "/v1/mesh/neighbor-reheal",
+  "/v1/mesh/neighbor_reheal",
+  "/v1/mesh/vote-to-fix",
+  "/v1/mesh/vote_to_fix",
+]);
+
+/** True when a path asks neighbors to rewrite a poisoned node. */
+export function isNeighborRehealPath(pathname) {
+  const raw = String(pathname == null ? "" : pathname).split("?")[0];
+  let path = raw.replace(/\/+$/, "") || "/";
+  if (!path.startsWith("/")) path = "/" + path;
+  if (NEIGHBOR_REHEAL_PATHS.includes(path)) return true;
+  const leaf = path.split("/").pop() || "";
+  const k = leaf.toLowerCase().replace(/[\s-]+/g, "_");
+  return k === "reheal" || k === "heal" || k === "neighbor_reheal" || k === "vote_to_fix";
 }
 
 /** Stamp the QNS-CD-1.0 cross-map so peers can see it on Live Nodes / status. */
@@ -260,7 +336,7 @@ export function attachQnsCd(doc) {
   return { ...doc, qns_cd, qns_cd_spec: QNS_CD_SPEC };
 }
 
-/** QNS-CD cite plus locked SPLIT THE WIRES / COLD-COPY SURVIVAL refuse text. */
+/** QNS-CD cite plus locked SPLIT THE WIRES / COLD-COPY SURVIVAL / REHEAL refuse text. */
 export function attachMeshCite(doc) {
   return attachMeshLaw(attachQnsCd(doc));
 }
@@ -279,6 +355,7 @@ export function emptyMesh(extra = {}) {
     source: extra.source || "fallback",
     node_gate: false,
     auto_heal: false,
+    neighbor_reheal: false,
     anonymity_network: false,
     author: MESH_IDENTITY,
     identity: MESH_IDENTITY,
@@ -291,6 +368,7 @@ export function emptyMesh(extra = {}) {
     rollup,
     node_gate: false,
     auto_heal: false,
+    neighbor_reheal: false,
     anonymity_network: false,
     author: MESH_IDENTITY,
     identity: MESH_IDENTITY,
@@ -354,7 +432,7 @@ export function parseMeshDoc(body) {
     source: inner.source || "parsed",
     door: inner.door || MESH_PATH,
     note: enabled
-      ? "QNM-BUILD-1.0. QNS-CD-1.0 photon QNS1 packet transfer. Suite mesh is on. Live|locked|isolated counts only. No Node Gate. No auto-heal. Not an anonymity network. No public qnsd proxy. SPLIT THE WIRES. COLD-COPY SURVIVAL. FragGate remains the single door."
+      ? "QNM-BUILD-1.0. QNS-CD-1.0 photon QNS1 packet transfer. Suite mesh is on. Live|locked|isolated counts only. No Node Gate. No auto-heal. Not an anonymity network. No public qnsd proxy. SPLIT THE WIRES. COLD-COPY SURVIVAL. REHEAL. FragGate remains the single door."
       : MESH_NOTE,
   });
 }
@@ -376,6 +454,7 @@ export function publicMesh(mesh) {
     source: m.source || "fallback",
     node_gate: false,
     auto_heal: false,
+    neighbor_reheal: false,
     anonymity_network: false,
     author: MESH_IDENTITY,
     identity: MESH_IDENTITY,
@@ -402,12 +481,12 @@ export function meshStatusLine(mesh) {
   const m = mesh && typeof mesh === "object" ? mesh : emptyMesh();
   if (m.enabled) {
     const r = meshRollup(m);
-    return "Suite mesh: on · live " + r.live + " · locked " + r.locked + " · isolated " + r.isolated + ". SPLIT THE WIRES. COLD-COPY SURVIVAL. FragGate remains the single door. Not an anonymity network.";
+    return "Suite mesh: on · live " + r.live + " · locked " + r.locked + " · isolated " + r.isolated + ". SPLIT THE WIRES. COLD-COPY SURVIVAL. REHEAL. FragGate remains the single door. Not an anonymity network.";
   }
   if (m.status === "unavailable") {
-    return "Suite mesh: off (unavailable). QNM-BUILD-1.0. QNS-CD-1.0. SPLIT THE WIRES. COLD-COPY SURVIVAL. FragGate remains the single door. Not an anonymity network.";
+    return "Suite mesh: off (unavailable). QNM-BUILD-1.0. QNS-CD-1.0. SPLIT THE WIRES. COLD-COPY SURVIVAL. REHEAL. FragGate remains the single door. Not an anonymity network.";
   }
-  return "Suite mesh: off (default). QNM-BUILD-1.0. QNS-CD-1.0. SPLIT THE WIRES. COLD-COPY SURVIVAL. FragGate remains the single door. Not an anonymity network.";
+  return "Suite mesh: off (default). QNM-BUILD-1.0. QNS-CD-1.0. SPLIT THE WIRES. COLD-COPY SURVIVAL. REHEAL. FragGate remains the single door. Not an anonymity network.";
 }
 
 /** Public Live Nodes count. Never auto-heal a visiting floor. */
@@ -428,6 +507,7 @@ export function meshPointer() {
     rollup: "live|locked|isolated",
     node_gate: false,
     auto_heal: false,
+    neighbor_reheal: false,
     anonymity_network: false,
     author: MESH_IDENTITY,
     identity: MESH_IDENTITY,
@@ -435,7 +515,7 @@ export function meshPointer() {
     fraggate_slug: MESH_SLUG,
     origin: RUNTIME + MESH_PATH,
     note:
-      "PROXY to aziel-runtime /v1/mesh/* via AZIEL_RUNTIME. Not a local op. Not AnonBroadcast. Not AZMail's product-local ring. FragGate remains the single door — not a second mesh door. Full node process is local qnm-node/. QNS-CD-1.0 photon QNS1 packet transfer is a hub cite / Worker mesh cross-map only — not a public qnsd proxy. SPLIT THE WIRES. COLD-COPY SURVIVAL. " +
+      "PROXY to aziel-runtime /v1/mesh/* via AZIEL_RUNTIME. Not a local op. Not AnonBroadcast. Not AZMail's product-local ring. FragGate remains the single door — not a second mesh door. Full node process is local qnm-node/. QNS-CD-1.0 photon QNS1 packet transfer is a hub cite / Worker mesh cross-map only — not a public qnsd proxy. SPLIT THE WIRES. COLD-COPY SURVIVAL. REHEAL. " +
       MESH_NOTE,
     anon_broadcast: ANON_BROADCAST,
     anon_broadcast_publish_path: false,

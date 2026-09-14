@@ -2,7 +2,7 @@
 
 Default OFF. live|locked|isolated. No Node Gate. No auto-heal. Not anonymity.
 QNS-CD-1.0 is a hub cite / Worker mesh cross-map only. No public qnsd proxy.
-SPLIT THE WIRES + COLD-COPY SURVIVAL refuse on rollup/status.
+SPLIT THE WIRES + COLD-COPY SURVIVAL + REHEAL refuse on rollup/status.
 FragGate remains the single door.
 """
 
@@ -63,6 +63,7 @@ def test_mesh_pointer_and_openapi_helpers() -> None:
     assert "export function attachMeshLaw" in MESH
     assert "export function attachMeshCite" in MESH
     assert "export function meshLawRefuse" in MESH
+    assert "export function isNeighborRehealPath" in MESH
     assert "export function alignLiveNodes" in MESH
     assert "fraggate_slug: MESH_SLUG" in MESH
     assert "fraggate_mesh_" in MESH
@@ -107,6 +108,33 @@ def test_split_the_wires_and_cold_copy_survival_refuse() -> None:
     assert "fraggate_single_door: true" in DOOR
     assert "/v1/fraggate" in DOOR
     assert "do not invent a second mesh door" in MESH
+
+
+def test_reheal_refuse() -> None:
+    """Poisoned node heals locally. Neighbor reheal is majority fanfic."""
+    assert "REHEAL" in MESH
+    assert "own last good tip" in MESH
+    assert "verified pull of bytes already trusted" in MESH
+    assert "phoenix-WAITs" in MESH
+    assert "not by listening to neighbors" in MESH
+    assert "live/locked/isolated/tip-hash" in MESH
+    assert "vote-to-fix" in MESH
+    assert "here's what you should be" in MESH
+    assert "isolate, drop tether, local phoenix" in MESH
+    assert "other nodes keep chain" in MESH
+    assert "isolation is cure" in MESH
+    assert "majority fanfic" in MESH
+    assert "group hug over a wound" in MESH
+    assert "MESH-REHEAL-REFUSED" in MESH
+    assert "export const REHEAL_REFUSE" in MESH
+    assert "export const REHEAL_LAW" in MESH
+    assert "neighbor_reheal: false" in MESH
+    assert "neighbor_reheal: false" in DOOR
+    assert "isNeighborRehealPath" in DOOR
+    assert 'meshLawRefuse("reheal")' in DOOR
+    assert "REHEAL" in MESH_NOTE_SOURCE()
+    assert "FragGate remains the single door" in MESH
+    assert "Aziel Eliab only" in MESH
 
 
 def test_door_proxies_mesh_via_aziel_runtime() -> None:
@@ -171,6 +199,6 @@ def test_docs_advertise_mesh_proxy() -> None:
     assert "GET never enables" in DOOR
     assert "GET /v1/mesh never enables" in RUNTIME
     assert "GET /v1/mesh never enables" in HOME
-    assert "attachQnsCd" in DOOR
+    assert "attachMeshCite" in DOOR
     assert "Aziel Eliab only" in RUNTIME
     assert "Aziel Eliab only" in HOME
