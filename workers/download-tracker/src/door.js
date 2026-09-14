@@ -11,7 +11,7 @@
  * Author: Aziel Eliab only. Apache-2.0.
  */
 
-import { attachQnsCd, QNS_CD, QNS_CD_SPEC } from "./mesh.js";
+import { attachMeshCite, attachQnsCd, QNS_CD, QNS_CD_SPEC } from "./mesh.js";
 
 export const DEFAULT_DOOR = "https://aziel-runtime.vibelock.workers.dev";
 export const KERNEL = "https://github.com/AzielEliab/fraggate";
@@ -211,10 +211,10 @@ export async function originFetch(env, pathAndQuery, init, request) {
 }
 
 function meshErrFields({ message, door_url, http_status, content_type, via, extra }) {
-  return attachQnsCd({
+  return attachMeshCite({
     ok: false,
     code: "MESH-ERR",
-    door: "mesh",
+    door: "fraggate",
     kernel: "mesh",
     spec: "QNM-BUILD-1.0",
     qns_cd: QNS_CD,
@@ -224,6 +224,8 @@ function meshErrFields({ message, door_url, http_status, content_type, via, extr
     node_gate: false,
     auto_heal: false,
     anonymity_network: false,
+    second_mesh_door: false,
+    fraggate_single_door: true,
     message,
     door_url: door_url || "",
     http_status: http_status == null ? null : http_status,
@@ -362,7 +364,7 @@ export async function runMeshProxy(env, request, pathAndQuery) {
       }),
     };
   }
-  return { status: res.status, data: attachQnsCd(data) };
+  return { status: res.status, data: attachMeshCite(data) };
 }
 
 export function json(body, status = 200, extraHeaders = {}) {

@@ -2,6 +2,8 @@
 
 Default OFF. live|locked|isolated. No Node Gate. No auto-heal. Not anonymity.
 QNS-CD-1.0 is a hub cite / Worker mesh cross-map only. No public qnsd proxy.
+SPLIT THE WIRES + COLD-COPY SURVIVAL refuse on rollup/status.
+FragGate remains the single door.
 """
 
 from __future__ import annotations
@@ -58,11 +60,53 @@ def test_mesh_pointer_and_openapi_helpers() -> None:
     assert "export function parseMeshDoc" in MESH
     assert "export function emptyMesh" in MESH
     assert "export function attachQnsCd" in MESH
+    assert "export function attachMeshLaw" in MESH
+    assert "export function attachMeshCite" in MESH
+    assert "export function meshLawRefuse" in MESH
     assert "export function alignLiveNodes" in MESH
     assert "fraggate_slug: MESH_SLUG" in MESH
     assert "fraggate_mesh_" in MESH
     assert "qns_cd: QNS_CD" in MESH
     assert "qns_cd_spec: QNS_CD_SPEC" in MESH
+
+
+def test_split_the_wires_and_cold_copy_survival_refuse() -> None:
+    """Locked mesh law is rollup/status refuse text. Not a second door."""
+    assert "SPLIT THE WIRES" in MESH
+    assert "tip-only 0.5–1s tick" in MESH
+    assert "pull-only payload" in MESH
+    assert "update=proof not timer" in MESH
+    assert "777s dwell after valid cite" in MESH
+    assert "equivocation ends peer" in MESH
+    assert "emit last locally" in MESH
+    assert "Phoenix local only" in MESH
+    assert "partition no auto-splice" in MESH
+    assert "heartbeat loss≠poison" in MESH
+    assert "1s≠777s sockets" in MESH
+    assert "COLD-COPY SURVIVAL" in MESH
+    assert "multiply cold copies" in MESH
+    assert "refuse live body sync" in MESH
+    assert "tip expensive to erase" in MESH
+    assert "server pull cannot wipe cold replicas" in MESH
+    assert "data outlives creators" in MESH
+    assert "MESH-STW-REFUSED" in MESH
+    assert "MESH-CCS-REFUSED" in MESH
+    assert "MESH-LAW-REFUSED" in MESH
+    assert "export const SPLIT_THE_WIRES_REFUSE" in MESH
+    assert "export const COLD_COPY_SURVIVAL_REFUSE" in MESH
+    assert "export const MESH_LAW_REFUSE" in MESH
+    assert "second_mesh_door: false" in MESH
+    assert "FragGate remains the single door" in MESH
+    assert "not a second mesh door" in MESH
+    assert "Aziel Eliab only" in MESH
+    assert "SPLIT THE WIRES" in MESH_NOTE_SOURCE()
+    assert "COLD-COPY SURVIVAL" in MESH_NOTE_SOURCE()
+    assert "attachMeshCite" in DOOR
+    assert 'door: "fraggate"' in DOOR
+    assert "second_mesh_door: false" in DOOR
+    assert "fraggate_single_door: true" in DOOR
+    assert "/v1/fraggate" in DOOR
+    assert "do not invent a second mesh door" in MESH
 
 
 def test_door_proxies_mesh_via_aziel_runtime() -> None:
