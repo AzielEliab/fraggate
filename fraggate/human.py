@@ -41,16 +41,16 @@ class HumanView:
 
 def welcome_text() -> str:
     return (
-        "FragGate runs a registered tool and writes each call to a local ledger.\n"
+        "FragGate verifies kernels in the background. Suite and agents call this door.\n"
+        "Each call is written to a local ledger.\n"
         "\n"
-        "Next: check this kernel.\n"
+        "Next: ask whether this kernel is alive.\n"
         "\n"
         "  fraggate ping\n"
         "\n"
         "Also:\n"
-        "  fraggate list\n"
-        "  fraggate ui\n"
-        "  fraggate --help\n"
+        "  fraggate doctor\n"
+        "  fraggate service\n"
         "\n"
         f"Author: {AUTHOR}\n"
         f"FragGate {VERSION} ({MAGIC})\n"
@@ -64,15 +64,15 @@ def welcome_payload() -> dict[str, object]:
         "magic": MAGIC,
         "paper": PAPER,
         "author": AUTHOR,
-        "summary": "FragGate runs a registered tool and writes each call to a local ledger.",
+        "summary": "FragGate verifies kernels in the background.",
         "next": "fraggate ping",
         "commands": [
             "ping",
+            "doctor",
+            "service",
             "list",
             "verify",
             "receipt",
-            "ui",
-            "doctor",
             "help",
             "call",
             "version",
@@ -81,21 +81,22 @@ def welcome_payload() -> dict[str, object]:
 
 
 def root_help() -> str:
-    return f"""fraggate — run a registered tool and keep a local ledger
+    return f"""fraggate — verify kernels in the background
 
 usage:
   fraggate [--home DIR] [--session ID] [--operator NAME] [--json] <command> [args]
 
 commands:
-  ping                 Check that this kernel is alive
+  ping                 Ask whether this kernel is alive
+  doctor               Plain pass or fail for this kernel
+  service              Listen on this computer and report Running
   list                 Show tools registered in this kernel
   verify <name>        Ask whether one tool name is registered
   receipt <text>       Hash an assertion into the local ledger
-  ui                   Open the local page on this computer
-  doctor               Plain pass or fail for this kernel
   help                 Show this help
 
 advanced:
+  ui                   Diagnostic page (same listener as service)
   call <tool>          Run a registered tool
   version              Print version, magic, and paper
 
@@ -109,9 +110,9 @@ options:
 examples:
   fraggate
   fraggate ping
-  fraggate list
-  fraggate verify runtime.ping
-  fraggate ui
+  fraggate doctor
+  fraggate service
+  fraggate service status
   fraggate ping --json
 
 Author: {AUTHOR}

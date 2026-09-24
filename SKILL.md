@@ -101,7 +101,7 @@ Do **not** invent flat `{slug}_{op}` tool names. They are not the door.
 
 ## Local kernel
 
-Human text is the default. Pass `--json` for the ResultEnvelope. `fraggate` with no arguments prints a short welcome.
+FragGate verifies kernels in the background. Human text is the default. Pass `--json` for the ResultEnvelope. `fraggate` with no arguments prints a short welcome. `fraggate doctor` is a plain pass or fail. `fraggate service status` reports Running or Quiet and does not call the kernel.
 
 ```bash
 pip install -e ".[dev]"

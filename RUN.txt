@@ -1,11 +1,12 @@
-FragGate — local kernel
+FragGate verifies kernels in the background.
 Author: Aziel Eliab
 
 1. python -m venv .venv && source .venv/bin/activate && pip install -e .
 2. fraggate
 3. fraggate ping
 
-Local page: fraggate ui
-It prints: Open http://127.0.0.1:<port>/
+Also: fraggate doctor
+Background listener: fraggate service
+Status: fraggate service status  (Running or Quiet)
 
 Machines: add --json

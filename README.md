@@ -1,6 +1,6 @@
 # FragGate
 
-FragGate runs a registered tool and writes each call to a local ledger.
+FragGate verifies kernels in the background. Suite and agents call this door. Each call is written to a local ledger.
 
 **Author:** Aziel Eliab
 **License:** [Apache-2.0](LICENSE)
@@ -21,13 +21,17 @@ pip install -e .
 fraggate
 ```
 
-3. Check this kernel:
+3. Ask whether this kernel is alive:
 
 ```bash
 fraggate ping
 ```
 
-`fraggate` and `python -m fraggate` are the same command. `fraggate ui` prints `Open http://127.0.0.1:<port>/` and serves that page on this computer. `fraggate doctor` prints a plain pass or fail. Add `--json` for the ResultEnvelope.
+`fraggate` and `python -m fraggate` are the same command. `fraggate doctor` prints a plain pass or fail. `fraggate service` listens on this computer and reports Running. `fraggate service status` reports Running or Quiet. Add `--json` for the ResultEnvelope.
+
+## Diagnostics
+
+`fraggate ui` is the same listener as `fraggate service`. On that page, Check kernel sits under Advanced. GET does not call the kernel.
 
 ```bash
 fraggate list

@@ -1,6 +1,6 @@
 # FragGate on a phone
 
-A reminder for the local kernel. Author: Aziel Eliab.
+A reminder that FragGate verifies kernels in the background. Author: Aziel Eliab.
 
 ## Start
 
@@ -8,7 +8,7 @@ A reminder for the local kernel. Author: Aziel Eliab.
 2. `flutter pub get`
 3. `flutter run`
 
-The first screen shows the next command: `fraggate ping`.
+The first screen shows the next commands: `fraggate ping`, `fraggate doctor`, and `fraggate service`.
 
 ## Notes
 

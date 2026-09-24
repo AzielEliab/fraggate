@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import socket
 from pathlib import Path
 
 from fraggate import FragGate
@@ -62,6 +63,14 @@ def test_help_is_short(capsys) -> None:
     assert "advanced:" in out
     assert "examples:" in out
     assert "fraggate ping" in out
+    commands = out.split("commands:", 1)[1].split("advanced:", 1)[0]
+    advanced = out.split("advanced:", 1)[1].split("examples:", 1)[0]
+    examples = out.split("examples:", 1)[1]
+    assert "service" in commands
+    assert "ui" not in commands
+    assert "ui" in advanced
+    assert "fraggate ui" not in examples
+    assert "fraggate service" in examples
     assert "changelog" not in out.lower()
     assert "what this is not" not in out.lower()
     assert main(["ping", "--help"]) == 0
@@ -71,9 +80,12 @@ def test_help_is_short(capsys) -> None:
 def test_bare_welcome(capsys) -> None:
     assert main([]) == 0
     out = capsys.readouterr().out
+    assert "background" in out
     assert "local ledger" in out
     assert "fraggate ping" in out
-    assert "fraggate ui" in out
+    assert "fraggate doctor" in out
+    assert "fraggate service" in out
+    assert "fraggate ui" not in out
     assert "Aziel Eliab" in out
     assert not out.lstrip().startswith("{")
     assert "what this is not" not in out.lower()
@@ -84,7 +96,9 @@ def test_welcome_json(capsys) -> None:
     payload = json.loads(capsys.readouterr().out)
     assert payload["author"] == "Aziel Eliab"
     assert payload["next"] == "fraggate ping"
-    assert "ping" in payload["commands"]
+    assert payload["summary"].startswith("FragGate verifies kernels in the background")
+    assert payload["commands"][:3] == ["ping", "doctor", "service"]
+    assert "ui" not in payload["commands"]
 
 
 def test_unknown_command(capsys) -> None:
@@ -191,3 +205,19 @@ def test_version_human_and_json(capsys) -> None:
     assert payload["author"] == "Aziel Eliab"
     assert payload["version"] == "0.1.0"
     assert payload["magic"] == "FGT1"
+
+
+def test_service_status_quiet(capsys) -> None:
+    sock = socket.socket()
+    sock.bind(("127.0.0.1", 0))
+    port = sock.getsockname()[1]
+    sock.close()
+    assert main(["service", "status", "--port", str(port)]) == 0
+    out = capsys.readouterr().out
+    assert out.startswith("Quiet.")
+    assert "fraggate service" in out
+    assert "Kernel is alive" not in out
+    assert main(["--json", "service", "status", "--port", str(port)]) == 0
+    payload = json.loads(capsys.readouterr().out)
+    assert payload["status"] == "quiet"
+    assert payload["port"] == port

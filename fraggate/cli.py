@@ -8,6 +8,8 @@ import json
 import os
 import re
 import sys
+import urllib.error
+import urllib.request
 from pathlib import Path
 from typing import Any, Callable
 
@@ -86,6 +88,8 @@ def explain_parse_error(prog: str, message: str) -> str:
     if "invalid choice" in message:
         match = re.search(r"invalid choice: '([^']*)'", message)
         name = match.group(1) if match else "that"
+        if command == "service":
+            return 'service takes an optional "status".\n\nTry: fraggate service'
         return f'Unknown command "{name}".\n\nTry: fraggate --help'
     if "required" in message:
         missing = message.split(":")[-1].strip()
@@ -99,7 +103,10 @@ def explain_parse_error(prog: str, message: str) -> str:
         extra = message.split(":", 1)[-1].strip()
         return f"Unknown option {extra}.\n\nTry: fraggate --help"
     if "invalid int value" in message:
-        return "The port needs to be a number from 0 to 65535.\n\nTry: fraggate ui --port 8765"
+        hinted = "fraggate service --port 8765"
+        if command == "ui":
+            hinted = "fraggate ui --port 8765"
+        return f"The port needs to be a number from 0 to 65535.\n\nTry: {hinted}"
     return f"{message}\n\nTry: fraggate --help"
 
 
@@ -298,11 +305,66 @@ def cmd_help(_: argparse.Namespace) -> int:
     return 0
 
 
-def cmd_ui(args: argparse.Namespace) -> int:
+def _running_text(port: int) -> str:
+    return (
+        "Running. FragGate is verifying this kernel in the background.\n"
+        f"Diagnostics: http://127.0.0.1:{port}/\n"
+    )
+
+
+def _quiet_text(port: int) -> str:
+    return (
+        f"Quiet. No FragGate listener is answering on 127.0.0.1:{port}.\n"
+        "\n"
+        "Next: fraggate service\n"
+    )
+
+
+def _service_status_payload(port: int, state: str) -> dict[str, Any]:
+    return {
+        "name": "FragGate",
+        "status": state,
+        "loopback": "127.0.0.1",
+        "port": port,
+        "summary": "FragGate verifies this kernel in the background.",
+        "next": "fraggate ping" if state == "running" else "fraggate service",
+    }
+
+
+def _probe_listener(port: int) -> bool:
+    request = urllib.request.Request(
+        f"http://127.0.0.1:{port}/?format=json",
+        headers={"Accept": "application/json"},
+    )
+    try:
+        with urllib.request.urlopen(request, timeout=1) as response:
+            if response.status != 200:
+                return False
+            payload = json.loads(response.read().decode("utf-8"))
+    except (OSError, urllib.error.URLError, json.JSONDecodeError, TimeoutError, ValueError):
+        return False
+    return payload.get("name") == "FragGate" and payload.get("status") == "running"
+
+
+def cmd_service_status(args: argparse.Namespace) -> int:
+    port = int(args.port)
+    running = _probe_listener(port)
+    state = "running" if running else "quiet"
+    if args.json:
+        print(json.dumps(_service_status_payload(port, state), indent=2, sort_keys=True))
+    elif running:
+        print(_running_text(port), end="")
+    else:
+        print(_quiet_text(port), end="")
+    return 0
+
+
+def _listen(args: argparse.Namespace, *, command_name: str) -> int:
     port = int(args.port)
     if port < 0 or port > 65535:
         print(
-            "The port needs to be a number from 0 to 65535.\n\nTry: fraggate ui --port 8765",
+            "The port needs to be a number from 0 to 65535.\n\n"
+            f"Try: fraggate {command_name} --port 8765",
             file=sys.stderr,
         )
         return 1
@@ -318,18 +380,22 @@ def cmd_ui(args: argparse.Namespace) -> int:
             if exc.errno == errno.EADDRINUSE:
                 suggested = 8766 if port in (0, 8765) else port + 1
                 print(
-                    f"Port {port} is already in use.\n\nTry: fraggate ui --port {suggested}",
+                    f"Port {port} is already in use.\n\n"
+                    f"Try: fraggate {command_name} --port {suggested}",
                     file=sys.stderr,
                 )
                 return 1
             print(
                 f"Could not listen on 127.0.0.1:{port} ({exc.strerror or exc}).\n\n"
-                "Try: fraggate ui --port 8765",
+                f"Try: fraggate {command_name} --port 8765",
                 file=sys.stderr,
             )
             return 1
-        bound_port = server.server_address[1]
-        print(f"Open http://127.0.0.1:{bound_port}/")
+        bound_port = int(server.server_address[1])
+        if args.json:
+            print(json.dumps(_service_status_payload(bound_port, "running"), indent=2, sort_keys=True))
+        else:
+            print(_running_text(bound_port), end="")
         try:
             server.serve_forever()
         except KeyboardInterrupt:
@@ -339,6 +405,16 @@ def cmd_ui(args: argparse.Namespace) -> int:
     finally:
         kernel.close()
     return 0
+
+
+def cmd_service(args: argparse.Namespace) -> int:
+    if getattr(args, "service_cmd", None) == "status":
+        return cmd_service_status(args)
+    return _listen(args, command_name="service")
+
+
+def cmd_ui(args: argparse.Namespace) -> int:
+    return _listen(args, command_name="ui")
 
 
 def _add_sub(sub: argparse._SubParsersAction, name: str, help_text: str, description: str) -> argparse.ArgumentParser:
@@ -392,13 +468,27 @@ def build_parser() -> FragParser:
     receipt.add_argument("assertion", help="Text to hash")
     receipt.set_defaults(func=cmd_receipt)
 
+    service = _add_sub(
+        sub,
+        "service",
+        "Listen on this computer and report Running",
+        "Listen on 127.0.0.1 and verify this kernel in the background.\n\n"
+        "  fraggate service\n"
+        "  fraggate service status\n\n"
+        "status reports Running or Quiet. It does not call the kernel.\n"
+        "GET on the listener does not call the kernel.",
+    )
+    service.add_argument("service_cmd", nargs="?", choices=["status"], help="Report Running or Quiet")
+    service.add_argument("--port", type=int, default=8765, help="Loopback port (default: 8765)")
+    service.set_defaults(func=cmd_service)
+
     ui = _add_sub(
         sub,
         "ui",
-        "Open the local page on this computer",
-        "Open the local page on 127.0.0.1.\n\n"
-        "Prints one line: Open http://127.0.0.1:<port>/\n"
-        "GET does not call the kernel. POST runs a real call.",
+        "Diagnostic page for the background listener",
+        "Diagnostic page on 127.0.0.1. Same listener as fraggate service.\n\n"
+        "  fraggate service\n\n"
+        "Check kernel stays under Advanced. GET does not call the kernel.",
     )
     ui.add_argument("--port", type=int, default=8765, help="Loopback port (default: 8765)")
     ui.set_defaults(func=cmd_ui)

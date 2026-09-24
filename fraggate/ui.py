@@ -186,7 +186,7 @@ class FragHandler(BaseHTTPRequestHandler):
             if _wants_json(self.headers.get("Accept", ""), query):
                 self._send_json(200, _status_payload())
             else:
-                self._send_html(200, _home_page())
+                self._send_html(200, _home_page(self.server.ledger_path))
             return
         if path == "/about":
             self._send_html(200, _about_page(self.server.ledger_path))
@@ -348,7 +348,7 @@ class FragHandler(BaseHTTPRequestHandler):
 
 def bind_server(kernel: FragGate, host: str, port: int, ledger_path: str) -> FragHTTPServer:
     if host != "127.0.0.1":
-        raise OSError("FragGate ui listens on 127.0.0.1 only")
+        raise OSError("FragGate listens on 127.0.0.1 only")
     return FragHTTPServer((host, port), kernel, ledger_path)
 
 
@@ -364,13 +364,14 @@ def _wants_json(accept: str, query: dict[str, list[str]]) -> bool:
 def _status_payload() -> dict[str, Any]:
     return {
         "name": "FragGate",
+        "status": "running",
         "version": VERSION,
         "magic": MAGIC,
         "paper": PAPER,
         "author": AUTHOR,
-        "summary": "FragGate runs a registered tool and writes each call to a local ledger.",
+        "summary": "FragGate verifies this kernel in the background.",
         "loopback": "127.0.0.1",
-        "next": "POST /ping",
+        "next": "fraggate ping",
     }
 
 
@@ -388,16 +389,19 @@ def _layout(title: str, main: str) -> str:
     )
 
 
-def _home_page() -> str:
+def _home_page(ledger_path: str) -> str:
     main = (
-        "<h1>Check this kernel</h1>\n"
-        '<p class="lead">FragGate runs a registered tool and writes each call to a local ledger.</p>\n'
-        '<form method="post" action="/ping">\n'
-        '<button class="primary" type="submit">Check this kernel</button>\n'
-        "</form>\n"
+        '<p class="muted">Background</p>\n'
+        "<h1>Running</h1>\n"
+        '<p class="lead">FragGate verifies this kernel in the background.</p>\n'
+        "<dl>\n"
+        f"<div><dt>Author</dt><dd>{_esc(AUTHOR)}</dd></div>\n"
+        f"<div><dt>Version</dt><dd>{_esc(VERSION)}</dd></div>\n"
+        f"<div><dt>Ledger file</dt><dd>{_esc(ledger_path)}</dd></div>\n"
+        "</dl>\n"
         + _advanced_html()
     )
-    return _layout("FragGate", main)
+    return _layout("Running · FragGate", main)
 
 
 def _about_page(ledger_path: str) -> str:
@@ -406,8 +410,8 @@ def _about_page(ledger_path: str) -> str:
         items.append(f"<li><strong>{_esc(spec.name)}</strong> <span>{_esc(spec.description)}</span></li>")
     main = (
         "<h1>About</h1>\n"
-        "<p>This page runs the FragGate kernel on this computer. "
-        "Each button is a real call, and the call is appended to the ledger file.</p>\n"
+        "<p>This page is a diagnostic for the background listener. "
+        "Check kernel, under Advanced, is a real call, and the call is appended to the ledger file.</p>\n"
         "<dl>\n"
         f"<div><dt>Author</dt><dd>{_esc(AUTHOR)}</dd></div>\n"
         f"<div><dt>Version</dt><dd>{_esc(VERSION)}</dd></div>\n"
@@ -473,7 +477,7 @@ def _next_button(command: str) -> str:
     if cmd == "list":
         return _post_button("/list", "Show registered tools", {})
     if cmd == "ping":
-        return _post_button("/ping", "Check this kernel", {})
+        return _post_button("/ping", "Check kernel", {})
     if cmd == "verify" and len(parts) >= 3 and not parts[2].startswith("<"):
         return _post_button("/verify", "Check this tool", {"name": parts[2]})
     if cmd == "call" and len(parts) >= 3 and not parts[2].startswith("<"):
@@ -496,6 +500,9 @@ def _post_button(action: str, label: str, fields: dict[str, str]) -> str:
 def _advanced_html() -> str:
     return """<details class="advanced">
 <summary>Advanced</summary>
+<form method="post" action="/ping">
+<button class="primary" type="submit">Check kernel</button>
+</form>
 <form method="post" action="/list">
 <button class="ghost" type="submit">Show registered tools</button>
 </form>

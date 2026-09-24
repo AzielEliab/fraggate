@@ -40,17 +40,17 @@ class DoorPage extends StatelessWidget {
             padding: const EdgeInsets.fromLTRB(20, 24, 20, 32),
             children: [
               Text(
-                'Check this kernel',
+                'Background',
                 style: Theme.of(context).textTheme.headlineSmall,
               ),
               const SizedBox(height: 8),
               const Text(
-                'FragGate runs a registered tool and writes each call to a local ledger.',
+                'FragGate verifies kernels in the background. Suite and agents call this door.',
               ),
               const SizedBox(height: 20),
               const SelectableText(
-                _next,
-                style: TextStyle(fontFamily: 'monospace', fontSize: 16),
+                'fraggate ping\nfraggate doctor\nfraggate service',
+                style: TextStyle(fontFamily: 'monospace', fontSize: 16, height: 1.5),
               ),
               const SizedBox(height: 16),
               FilledButton(
@@ -82,6 +82,7 @@ class DoorPage extends StatelessWidget {
                   _CommandLine('fraggate verify runtime.ping'),
                   _CommandLine('fraggate receipt "kernel is local"'),
                   _CommandLine('fraggate call runtime.ping'),
+                  _CommandLine('fraggate service status'),
                   _CommandLine('fraggate ui'),
                   Padding(
                     padding: EdgeInsets.only(top: 8),
@@ -123,8 +124,8 @@ class AboutPage extends StatelessWidget {
             padding: EdgeInsets.fromLTRB(20, 24, 20, 32),
             children: [
               Text(
-                'This screen reminds you of the FragGate kernel on your computer. '
-                'Copy the command, then run it in a terminal.',
+                'FragGate verifies kernels in the background. '
+                'Copy fraggate ping, then run it in a terminal on the computer that holds the kernel.',
               ),
               SizedBox(height: 16),
               Text('Author: Aziel Eliab'),

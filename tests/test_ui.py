@@ -11,6 +11,7 @@ from pathlib import Path
 import pytest
 
 from fraggate import FragGate
+from fraggate.cli import main
 from fraggate.ui import bind_server
 
 
@@ -74,7 +75,11 @@ def test_home_is_human_and_get_does_not_call(ui_server) -> None:
     assert _server.server_address[0] == "127.0.0.1"
     status, html = _get(port, "/")
     assert status == 200
-    assert "Check this kernel" in html
+    assert "Running" in html
+    assert "Background" in html
+    assert "verifies this kernel in the background" in html
+    assert "Check kernel" in html.split("<details", 1)[1]
+    assert "Check this kernel" not in html
     assert 'name="viewport"' in html
     assert "prefers-color-scheme" in html
     assert ":focus-visible" in html
@@ -85,13 +90,16 @@ def test_home_is_human_and_get_does_not_call(ui_server) -> None:
     assert "what this is not" not in html.lower()
     assert "Aziel Eliab" in html
     before_details = html.split("<details", 1)[0]
-    assert before_details.count('class="primary"') == 1
+    assert 'class="primary"' not in before_details
+    assert "Open http" not in html
     assert not ledger.exists()
 
     status, payload = _get(port, "/?format=json")
     assert status == 200
     body = json.loads(payload)
     assert body["author"] == "Aziel Eliab"
+    assert body["status"] == "running"
+    assert body["next"] == "fraggate ping"
     assert "alive" not in body
     assert not ledger.exists()
 
@@ -129,6 +137,22 @@ def test_bad_name_is_escaped_and_plain(ui_server) -> None:
     assert status == 400
     assert "Enter a tool name." in html
     assert "fraggate verify runtime.ping" in html
+
+
+def test_service_status_reports_running_without_a_call(ui_server, capsys) -> None:
+    _server, port, ledger = ui_server
+    assert main(["service", "status", "--port", str(port)]) == 0
+    out = capsys.readouterr().out
+    assert out.startswith("Running.")
+    assert "background" in out
+    assert "Kernel is alive" not in out
+    assert not ledger.exists()
+    assert main(["--json", "service", "status", "--port", str(port)]) == 0
+    payload = json.loads(capsys.readouterr().out)
+    assert payload["status"] == "running"
+    assert payload["port"] == port
+    assert "alive" not in payload
+    assert not ledger.exists()
 
 
 def test_foreign_host_is_refused(ui_server) -> None:
