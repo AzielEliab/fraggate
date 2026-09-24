@@ -1,0 +1,11 @@
+FragGate — local kernel
+Author: Aziel Eliab
+
+1. python -m venv .venv && source .venv/bin/activate && pip install -e .
+2. fraggate
+3. fraggate ping
+
+Local page: fraggate ui
+It prints: Open http://127.0.0.1:<port>/
+
+Machines: add --json
