@@ -1,35 +1,21 @@
-# FragGate — iPhone & Android
+# FragGate on a phone
 
-On-device reminder that FragGate is the door: list / describe / call / verify.
-Not a second kernel. Offline scaffold. No analytics. Dark matte / gold.
+A reminder that FragGate verifies kernels in the background. Author: Aziel Eliab.
+
+## Start
+
+1. From `mobile/`, generate the platform folders if they are still skeleton notes: `flutter create --org com.azieeliab --project-name fraggate .`
+2. `flutter pub get`
+3. `flutter run`
+
+The first screen shows the next commands: `fraggate ping`, `fraggate doctor`, and `fraggate service`.
+
+## Notes
+
+The kernel in this repository runs on your computer with `fraggate`. The ledger file is `./.fraggate/ledger.jsonl`. Aziel Runtime hosts the public mesh.
 
 Application id: `com.azieeliab.fraggate`
 
-## Open in Android Studio / Xcode
+Desktop package: https://github.com/AzielEliab/fraggate
 
-The `android/` and `ios/` folders here are skeleton READMEs because
-this tree was written without the Flutter SDK on PATH.
-
-```bash
-cd mobile
-flutter create --org com.azieeliab --project-name fraggate .
-flutter pub get
-flutter run
-```
-
-Then open `android/` in Android Studio, or `ios/Runner.xcworkspace` in
-Xcode.
-
-## Honest scope
-
-This phone app does not replace the Worker UI or the catalog MCP.
-Agent path stays `POST https://aziel-runtime.vibelock.workers.dev/mcp`
-and `/v1/fraggate/*`.
-
-## Desktop package (counted download)
-
-# → https://fraggate-download-tracker.vibelock.workers.dev/ ←
-
-GitHub: https://github.com/AzielEliab/fraggate
-
-**Forks are welcome and always allowed.**
+Forks are welcome and always allowed.

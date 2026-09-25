@@ -1,16 +1,63 @@
 # FragGate
 
-**FG-0.1 kernel against tool fragmentation and model hallucination.**
+FragGate verifies kernels in the background. Suite and agents call this door. Each call is written to a local ledger.
 
-**FragGate is THE single door (FG-0.1).** Host: [Aziel Runtime](https://github.com/AzielEliab/aziel-runtime) **2.0.0-rc1**.
+**Author:** Aziel Eliab
+**License:** [Apache-2.0](LICENSE)
+**Version:** 0.1.0 · Magic `FGT1` · Paper [FG-WP-0.1](docs/FG-WP-0.1.md)
 
-Author: **Aziel Eliab** only. Aka / `alternateName` only: **Aziel Elroi Eliab** (Elroi).
-License: [Apache-2.0](LICENSE)
-Version: 0.1.0
-Magic: `FGT1`
-Paper: [FG-WP-0.1](docs/FG-WP-0.1.md)
+## Start
+
+1. Install:
+
+```bash
+python -m venv .venv && source .venv/bin/activate
+pip install -e .
+```
+
+2. Read the welcome:
+
+```bash
+fraggate
+```
+
+3. Ask whether this kernel is alive:
+
+```bash
+fraggate ping
+```
+
+`fraggate` and `python -m fraggate` are the same command. `fraggate doctor` prints a plain pass or fail. `fraggate service` listens on this computer and reports Running. `fraggate service status` reports Running or Quiet. Add `--json` for the ResultEnvelope.
+
+## Diagnostics
+
+`fraggate ui` is the same listener as `fraggate service`. On that page, Check kernel sits under Advanced. GET does not call the kernel.
+
+```bash
+fraggate list
+fraggate verify runtime.ping
+fraggate receipt "kernel is local"
+fraggate --help
+```
+
+`fraggate call` runs any registered tool. Flags for arguments, dry-run, export, search, and destructive calls are under `fraggate call --help`.
+
+```python
+from fraggate import FragGate, ToolSpec
+
+kernel = FragGate(session_id="demo", operator="Aziel Eliab", ledger_path="tmp/ledger.jsonl")
+print(kernel.call(kernel.envelope("runtime.ping", intent="Ping the kernel for liveness.")).result)
+kernel.close()
+```
+
+Each call appends `ledger.jsonl` under the home directory (default `./.fraggate`).
+
+## Reference
+
+**FragGate is the single door (FG-0.1).** Host: [Aziel Runtime](https://github.com/AzielEliab/aziel-runtime) **2.0.0-rc1**.
+
 Spec: [FragGate v0 field tables](docs/FragGate_v0_spec.md)
-Kernel homepage (runtime door): https://aziel-runtime.vibelock.workers.dev/
+Kernel homepage: https://aziel-runtime.vibelock.workers.dev/
 Human Worker UI: https://fraggate-download-tracker.vibelock.workers.dev/
 
 Forks are welcome and always allowed.
@@ -32,7 +79,7 @@ Forks are welcome and always allowed.
 
 ## Dual surface
 
-FragGate is the **door**. aziel-runtime hosts the public mesh. This repo is the local FG-0.1 kernel **and** the human Worker / counted download / Flutter scaffold. Not UI-only.
+FragGate is the **door**. aziel-runtime hosts the public mesh. This repository is the local FG-0.1 kernel, the human Worker, the counted download, and the Flutter scaffold.
 
 1. **Agent / MCP / OpenAPI** — discover, route, refuse through the door. Canonical agent path:
    - `POST https://aziel-runtime.vibelock.workers.dev/mcp`
@@ -50,7 +97,7 @@ This Worker (`fraggate-download-tracker`) **doubles** those ops (proxy, not a se
 - Routes: `/v1/fraggate/list` · `/describe` · `/verify` · `/call`
 - Suite mesh PROXY: `/v1/mesh/*` via `AZIEL_RUNTIME` / `https://aziel-runtime.vibelock.workers.dev`. Default OFF. QNM-BUILD-1.0 live|locked|isolated. QNS-CD-1.0 photon QNS1 packet transfer is a hub cite / Worker mesh cross-map only (local qnsd in [qnm-node](https://github.com/AzielEliab/qnm-node); runtime cites + catalog field in [aziel-runtime](https://github.com/AzielEliab/aziel-runtime); pair custody in [AZInterface](https://github.com/AzielEliab/azinterface)). Not a Softwares-tab product. No public qnsd proxy. No Node Gate. Catalog MCP `mesh_*` + FragGate `slug=mesh`.
 
-The Python kernel is unchanged FG-0.1. Do not open a second kernel for the same session.
+The Python kernel is FG-0.1. One kernel stays open per session.
 
 ## Compatible AI clients
 
@@ -58,9 +105,9 @@ ChatGPT (GPT Actions / OpenAI), Grok (xAI), Venice, Claude (Anthropic Desktop / 
 
 Import catalog OpenAPI as a GPT Action / custom HTTP tool, or `POST` the catalog MCP. Always send `User-Agent: Mozilla/5.0`.
 
-## What it is
+## Kernel
 
-A **kernel**, not a toolkit. Tools attach only through registration.
+Tools attach through registration.
 
 ```
 operator intent → CallEnvelope → Registry.require(tool) → Schema check
@@ -68,18 +115,13 @@ operator intent → CallEnvelope → Registry.require(tool) → Schema check
   → ResultEnvelope → Ledger.append
 ```
 
-v0.1 door tools: `runtime.ping`, `registry.list`, `registry.verify`, `claim.check`, `runtime.receipt`. Everything else binds with `bind_adapter`.
+v0.1 door tools: `runtime.ping`, `registry.list`, `registry.verify`, `claim.check`, `runtime.receipt`. Other tools bind with `bind_adapter`.
 
-## What it is not
+## Notes
 
-- Not another Lock product. GodLock, TemporalLock, DecisionGATE, and the rest stay products. They may attach as adapters.
-- Not a chatbot personality and not a second identity.
-- Not a network relay or public chat surface.
-- Not a second kernel. The Worker proxies the public door; local FG-0.1 stays local.
-- Not a rewrite of the Locks.
-- Not a DOI mint.
+Public identity is **Aziel Eliab**. Aziel Elroi Eliab (Elroi) is an alternate name. GodLock is a product name.
 
-Public identity is **Aziel Eliab** only (Elroi aka OK). GodLock is a product name, not an author.
+This repository is the local FG-0.1 kernel: envelopes, a hashed registry, a DecisionGATE check, claim rules, and a JSONL ledger. Lock products stay their own products and may attach with `bind_adapter`. One kernel stays open per session. The Worker proxies the public door; the local kernel stays on this computer. Aziel Runtime hosts the public mesh. This kernel does not mint DOIs.
 
 ## Relation to aziel-runtime
 
@@ -90,40 +132,14 @@ Public identity is **Aziel Eliab** only (Elroi aka OK). GodLock is a product nam
 - Primary MCP install: **[Try on Glama](https://glama.ai/mcp/servers/AzielEliab/aziel-runtime)**. Worker origin is secondary.
 - A Lock should not remain a private runtime. It binds here. The runtime remains the public host.
 
-## Install
-
-```bash
-python -m venv .venv && source .venv/bin/activate
-pip install -e ".[dev]"
-```
-
-Stdlib runtime. pytest is the dev extra.
-
-One-click (counted) from the Worker:
+## Counted install
 
 ```bash
 curl -fsSL https://fraggate-download-tracker.vibelock.workers.dev/install.sh | bash
+fraggate ping
 ```
 
-## Quickstart
-
-```bash
-python -m fraggate ping
-python -m fraggate list
-python -m fraggate verify runtime.ping
-python -m fraggate call runtime.ping
-python -m fraggate receipt "operator asserts the kernel is local"
-```
-
-Same verbs exist as the `fraggate` entrypoint. Each command builds a CallEnvelope, runs the pipeline, appends the ledger at `./.fraggate/ledger.jsonl`, and prints a ResultEnvelope.
-
-```python
-from fraggate import FragGate, ToolSpec
-
-kernel = FragGate(session_id="demo", operator="Aziel Eliab", ledger_path="tmp/ledger.jsonl")
-print(kernel.call(kernel.envelope("runtime.ping", intent="Ping the kernel for liveness.")).result)
-kernel.close()
-```
+Stdlib runtime. pytest is the dev extra: `pip install -e ".[dev]"`.
 
 ## Button test matrix
 
