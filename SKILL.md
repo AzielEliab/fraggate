@@ -24,7 +24,7 @@ second identity, or a second kernel. The Worker UI does not invent ops the
 agent cannot call.
 
 aziel-runtime hosts the public mesh. **FragGate is the door.** Do not credit
-GodLock.AZ, Horton, or OpenAI as author.
+GodLock.AZ, a former legal surname, or OpenAI as author.
 
 ## Dual-surface law
 
